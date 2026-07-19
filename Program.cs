@@ -16,7 +16,7 @@ namespace KFRestaurante
             {
                 Console.WriteLine($"O cardapio contem {o.Nome} que é um {o.Categoria}");
             }
-         
+
         }
 
     }
