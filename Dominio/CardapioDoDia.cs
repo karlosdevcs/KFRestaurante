@@ -20,13 +20,27 @@ namespace KFRestaurante.Dominio
 		public CardapioDoDia(DateOnly dataPublicacao)
 		{
 			this.DataPublicacao = dataPublicacao;
-			this.Situacao = SituacaoCardapio.Publicado;
+			this.Situacao = SituacaoCardapio.Rascunho;
 
         }
 
 		public void AdicionarOpcao(Opcao opcao)
 		{
 			_opcoes.Add(opcao);
+		}
+
+		public void Publicar()
+		{
+			if (_opcoes.Count == 0)
+				
+			{
+				throw new InvalidOperationException("Nao e possivel publicar um cardapio vazio");
+
+			} else
+			{
+				this.Situacao = SituacaoCardapio.Publicado; 
+			}
+
 		}
 
 
