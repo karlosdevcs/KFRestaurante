@@ -26,7 +26,25 @@ namespace KFRestaurante.Dominio
 
 		public void AdicionarOpcao(Opcao opcao)
 		{
-			_opcoes.Add(opcao);
+			bool jaExiste = false;
+
+			foreach (Opcao o in _opcoes)
+			{
+				if (o.Nome == opcao.Nome)
+				{
+					jaExiste = true;
+
+				}
+            }
+				if (jaExiste == true)
+				{
+					throw new InvalidOperationException("Esta opcao ja existe");
+				} else
+				{
+                    _opcoes.Add(opcao);
+                }
+			
+			//_opcoes.Add(opcao);
 		}
 
 		public void Publicar()

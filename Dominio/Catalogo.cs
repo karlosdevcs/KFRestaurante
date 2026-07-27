@@ -19,7 +19,24 @@ namespace KFRestaurante.Dominio
         public void AdicionarOpcao(Opcao opcao)//metodo criado, a vitrine e get-only (so mostra, nao recebe) nao e possivel escrever nela, e o papel do metodo e ADICIONAR UM ITEM na lista que ja existe
             //"pega a opcao que chegou e poe ela dentro do estoque, o estoque e _opcao e colocar dentro e .add"
         {
-            _opcoes.Add(opcao);
+            bool jaExiste = false;
+
+            foreach (Opcao o in _opcoes)
+            {
+                if (o.Nome == opcao.Nome)
+                {
+                    jaExiste = true;
+
+                }
+            }
+            if (jaExiste == true)
+            {
+                throw new InvalidOperationException("Esta opcao ja existe");
+            }
+            else
+            {
+                _opcoes.Add(opcao);
+            }
         }
 
     }
