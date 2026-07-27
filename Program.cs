@@ -1,4 +1,5 @@
 ﻿using KFRestaurante.Dominio;
+using System.Linq.Expressions;
 
 namespace KFRestaurante
 {
@@ -6,6 +7,22 @@ namespace KFRestaurante
     {
         static void Main(string[] args)
         {
+
+            Opcao coca = new Opcao("Coca-cola", Categoria.Bebida, 5);
+            ItemDoPedido item = new ItemDoPedido(coca, 2);
+
+            Console.WriteLine($"Preco {item.PrecoUnitario}");
+            Console.WriteLine($"Quantidade {item.Quantidade}");
+            Console.WriteLine($"Subtotal {item.Subtotal}");
+
+            coca.Preco = 8;
+            Console.WriteLine($"Preco da coca agora: {coca.Preco}");
+            Console.WriteLine($"Preco unitario do item (deve continuar 5): {item.PrecoUnitario}");
+            Console.WriteLine($"Subtotal do item (deve continuar 10): {item.Subtotal}");
+
+
+
+/*
             Catalogo catalogo = new Catalogo();
 
             catalogo.AdicionarOpcao(new Opcao("Arroz", Categoria.Acompanhamento));
@@ -27,7 +44,7 @@ namespace KFRestaurante
             {
                 Console.WriteLine($"O catalogo contem {o.Nome} da categoria {o.Categoria}");
             }
-
+*/
 
         }
 
