@@ -19,33 +19,6 @@ namespace KFRestaurante
             Console.WriteLine($"Preco da coca agora: {coca.Preco}");
             Console.WriteLine($"Preco unitario do item (deve continuar 5): {item.PrecoUnitario}");
             Console.WriteLine($"Subtotal do item (deve continuar 10): {item.Subtotal}");
-
-
-
-/*
-            Catalogo catalogo = new Catalogo();
-
-            catalogo.AdicionarOpcao(new Opcao("Arroz", Categoria.Acompanhamento));
-            catalogo.AdicionarOpcao(new Opcao("Batata", Categoria.Prato));
-
-
-
-            try
-            {
-                catalogo.AdicionarOpcao(new Opcao("Arroz", Categoria.Acompanhamento));
-
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine("Erro em " + e.Message);
-            }
-
-            foreach (Opcao o in catalogo.Opcoes)
-            {
-                Console.WriteLine($"O catalogo contem {o.Nome} da categoria {o.Categoria}");
-            }
-*/
-
         }
 
     }

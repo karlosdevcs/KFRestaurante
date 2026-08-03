@@ -39,6 +39,7 @@ namespace KFRestaurante.Dominio
 				if (jaExiste == true)
 				{
 					throw new InvalidOperationException("Esta opcao ja existe");
+
 				} else
 				{
                     _opcoes.Add(opcao);
