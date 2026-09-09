@@ -13,12 +13,18 @@ namespace KFRestaurante
             Opcao suco = new Opcao("Suco de laranja", Categoria.Bebida, 3);
             ItemDoPedido item2 = new ItemDoPedido(suco, 1);
 
+            TamanhoMarmita marmita = new TamanhoMarmita("G", 25);
+            Marmita marmita1 = new Marmita(marmita);
+
+            ItemDoPedido item3 = new ItemDoPedido(marmita1, 1);
+
 
             Console.WriteLine(item.Subtotal);
 
             Pedido pedido1 = new Pedido(1, FormadePagamento.Pix, TipoDeEntrega.Entrega);
             pedido1.AdicionarItem(item);
             pedido1.AdicionarItem(item2);
+            pedido1.AdicionarItem(item3);
 
             Console.WriteLine(pedido1.CalcularTotal());
 

@@ -9,17 +9,17 @@ namespace KFRestaurante.Dominio
 {
     public class ItemDoPedido
     {
-        public Opcao Opcao { get; private set; }
+        public IPedivel Pedivel { get; private set; }
         public int Quantidade { get; set; }
         public decimal PrecoUnitario { get; private set; }
 
         public decimal Subtotal => Quantidade * PrecoUnitario;
 
 
-        public ItemDoPedido(Opcao opcao, int quantidade)
+        public ItemDoPedido(IPedivel pedivel, int quantidade)
         {
-            this.PrecoUnitario = opcao.Preco;
-            this.Opcao = opcao;
+            this.PrecoUnitario = pedivel.Preco;
+            this.Pedivel = pedivel;
             this.Quantidade = quantidade;
           
         }

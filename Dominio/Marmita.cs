@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace KFRestaurante.Dominio
 {
-    public class Marmita
+    public class Marmita: IPedivel
     {
         public TamanhoMarmita Tamanho {get; private set;}
 
@@ -24,6 +24,6 @@ namespace KFRestaurante.Dominio
             _opcoes.Add(opcao); 
         }
 
-        public decimal PrecoMarmita => Tamanho.Preco; 
+        public decimal Preco => Tamanho.Preco; 
     }
 }

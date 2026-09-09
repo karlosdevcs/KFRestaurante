@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace KFRestaurante.Dominio
 {
-    public class Opcao
+    public class Opcao: IPedivel
     {
         public string Nome { get; set; }
         public Categoria Categoria { get; set; }
