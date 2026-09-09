@@ -19,14 +19,28 @@ namespace KFRestaurante
             ItemDoPedido item3 = new ItemDoPedido(marmita1, 1);
 
 
-            Console.WriteLine(item.Subtotal);
+            //Console.WriteLine(item.Subtotal);
 
-            Pedido pedido1 = new Pedido(1, FormadePagamento.Pix, TipoDeEntrega.Entrega);
+            Pedido pedido1 = new Pedido(001, FormadePagamento.Pix, TipoDeEntrega.Entrega);
             pedido1.AdicionarItem(item);
             pedido1.AdicionarItem(item2);
             pedido1.AdicionarItem(item3);
 
-            Console.WriteLine(pedido1.CalcularTotal());
+            // Console.WriteLine(pedido1.CalcularTotal());
+
+
+            Console.WriteLine("Informacoes do Pedido");
+            Console.WriteLine($"Pedido numero: {pedido1.Numero}, {pedido1.HoraPedido}, {pedido1.FormaDePagamento}");
+
+
+            foreach (ItemDoPedido i in pedido1.Itens)
+            {
+                Console.WriteLine($"- { i.Quantidade}x - {i.Pedivel.Nome} - R$: {i.Subtotal}");
+              
+            }
+
+            Console.WriteLine($"TOTAL R$: {pedido1.CalcularTotal()}");
+            Console.WriteLine($"{pedido1.TipoDeEntrega}");
 
         }
 

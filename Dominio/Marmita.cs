@@ -24,6 +24,8 @@ namespace KFRestaurante.Dominio
             _opcoes.Add(opcao); 
         }
 
-        public decimal Preco => Tamanho.Preco; 
+        public decimal Preco => Tamanho.Preco;
+
+        public string Nome => $"Marmita {Tamanho.Nome}";
     }
 }

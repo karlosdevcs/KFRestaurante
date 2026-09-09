@@ -9,6 +9,8 @@ namespace KFRestaurante.Dominio
     public interface IPedivel
     {
         decimal Preco { get; }
+        string Nome { get; }
+
 
     }
 }
