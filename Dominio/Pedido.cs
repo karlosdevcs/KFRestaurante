@@ -34,12 +34,7 @@ namespace KFRestaurante.Dominio
 
         public decimal CalcularTotal()
         {
-            decimal total = 0;
-            foreach (ItemDoPedido ip in _itens)
-            {
-                total += ip.Subtotal;
-            }
-            return total;
+            return _itens.Sum(ip => ip.Subtotal);
         }
 
 
