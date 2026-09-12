@@ -18,6 +18,29 @@ namespace KFRestaurante
 
             ItemDoPedido item3 = new ItemDoPedido(marmita1, 1);
 
+            Catalogo catalogo = new Catalogo();
+
+            catalogo.AdicionarOpcao(new Opcao("Arroz", Categoria.Acompanhamento));
+
+            try
+            {
+                catalogo.AdicionarOpcao(new Opcao("Arroz", Categoria.Acompanhamento));
+
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("Erro em " + e.Message);
+            }
+
+            catalogo.AdicionarOpcao(new Opcao("Batata", Categoria.Acompanhamento));
+
+            foreach (Opcao o in catalogo.Opcoes)
+            {
+                Console.WriteLine($"Adicionado no catalogo {o.Nome} das categorias {o.Categoria}");
+            }
+
+            Console.WriteLine("===========INFORMACOES DO PEDIDO==========");
+
 
             //Console.WriteLine(item.Subtotal);
 
@@ -35,8 +58,8 @@ namespace KFRestaurante
 
             foreach (ItemDoPedido i in pedido1.Itens)
             {
-                Console.WriteLine($"- { i.Quantidade}x - {i.Pedivel.Nome} - R$: {i.Subtotal}");
-              
+                Console.WriteLine($"- {i.Quantidade}x - {i.Pedivel.Nome} - R$: {i.Subtotal}");
+
             }
 
             Console.WriteLine($"TOTAL R$: {pedido1.CalcularTotal()}");
