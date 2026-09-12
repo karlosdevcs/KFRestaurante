@@ -42,28 +42,42 @@ namespace KFRestaurante
             Console.WriteLine("===========INFORMACOES DO PEDIDO==========");
 
 
-            //Console.WriteLine(item.Subtotal);
+            Restaurante situacaoRestaurante = new Restaurante();
 
-            Pedido pedido1 = new Pedido(001, FormadePagamento.Pix, TipoDeEntrega.Entrega);
-            pedido1.AdicionarItem(item);
-            pedido1.AdicionarItem(item2);
-            pedido1.AdicionarItem(item3);
+            try
+            {
+                Pedido pedidoteste = new Pedido(002, FormadePagamento.CartaoDeDebito, TipoDeEntrega.Retirada, situacaoRestaurante);
 
-            // Console.WriteLine(pedido1.CalcularTotal());
 
+            } catch (Exception e)
+            {
+                Console.WriteLine("O restaurante precisa estar aberto para fazer pedidos. Aguarde! " + e.Message);
+            }
+
+            Restaurante situacaoRestaurante2 = new Restaurante();
+            situacaoRestaurante2.Aberto = true;
+
+            Pedido pedido2 = new Pedido(002, FormadePagamento.CartaoDeDebito, TipoDeEntrega.Retirada, situacaoRestaurante2);
+
+            pedido2.AdicionarItem(item);
+            pedido2.AdicionarItem(item2);
+            pedido2.AdicionarItem(item3);
 
             Console.WriteLine("Informacoes do Pedido");
-            Console.WriteLine($"Pedido numero: {pedido1.Numero}, {pedido1.HoraPedido}, {pedido1.FormaDePagamento}");
+            Console.WriteLine($"Pedido numero: {pedido2.Numero}, {pedido2.HoraPedido}, {pedido2.FormaDePagamento}");
 
-
-            foreach (ItemDoPedido i in pedido1.Itens)
+            foreach (ItemDoPedido i in pedido2.Itens)
             {
                 Console.WriteLine($"- {i.Quantidade}x - {i.Pedivel.Nome} - R$: {i.Subtotal}");
 
             }
 
-            Console.WriteLine($"TOTAL R$: {pedido1.CalcularTotal()}");
-            Console.WriteLine($"{pedido1.TipoDeEntrega}");
+            Console.WriteLine($"TOTAL R$: {pedido2.CalcularTotal()}");
+            Console.WriteLine($"{pedido2.TipoDeEntrega}");
+
+
+
+
 
         }
 

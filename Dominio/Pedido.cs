@@ -23,13 +23,19 @@ namespace KFRestaurante.Dominio
             _itens.Add(item);
         }
 
-        public Pedido(int numero, FormadePagamento formadepagamento, TipoDeEntrega tipodeentrega) 
+        public Pedido(int numero, FormadePagamento formadepagamento, TipoDeEntrega tipodeentrega, Restaurante restaurante) 
         
         {
+            if (!restaurante.Aberto)
+            {
+                throw new InvalidOperationException("O restaurante esta fechado");
+            } 
+
             this.Numero = numero;
             this.HoraPedido = DateTime.Now;
             this.FormaDePagamento = formadepagamento;
             this.TipoDeEntrega = tipodeentrega;
+           
         }
 
         public decimal CalcularTotal()
