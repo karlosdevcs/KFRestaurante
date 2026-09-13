@@ -16,7 +16,7 @@ namespace KFRestaurante
             TamanhoMarmita marmita = new TamanhoMarmita("G", 25);
             Marmita marmita1 = new Marmita(marmita);
 
-            ItemDoPedido item3 = new ItemDoPedido(marmita1, 1);
+            //ItemDoPedido item3 = new ItemDoPedido(marmita1, 1);
 
             Catalogo catalogo = new Catalogo();
 
@@ -43,39 +43,79 @@ namespace KFRestaurante
 
 
             Restaurante situacaoRestaurante = new Restaurante();
+            /*
+                        try
+                        {
+                            Pedido pedidoteste = new Pedido(002, FormadePagamento.CartaoDeDebito, TipoDeEntrega.Retirada, situacaoRestaurante);
 
-            try
-            {
-                Pedido pedidoteste = new Pedido(002, FormadePagamento.CartaoDeDebito, TipoDeEntrega.Retirada, situacaoRestaurante);
 
+                        } catch (Exception e)
+                        {
+                            Console.WriteLine("O restaurante precisa estar aberto para fazer pedidos. Aguarde! " + e.Message);
+                        }
 
-            } catch (Exception e)
-            {
-                Console.WriteLine("O restaurante precisa estar aberto para fazer pedidos. Aguarde! " + e.Message);
-            }
+                        Restaurante situacaoRestaurante2 = new Restaurante();
+                        situacaoRestaurante2.Aberto = true;
+
+                        Pedido pedido2 = new Pedido(002, FormadePagamento.CartaoDeDebito, TipoDeEntrega.Retirada, situacaoRestaurante2);
+
+                        pedido2.AdicionarItem(item);
+                        pedido2.AdicionarItem(item2);
+                        pedido2.AdicionarItem(item3);
+
+                        Console.WriteLine("Informacoes do Pedido");
+                        Console.WriteLine($"Pedido numero: {pedido2.Numero}, {pedido2.HoraPedido}, {pedido2.FormaDePagamento}");
+
+                        foreach (ItemDoPedido i in pedido2.Itens)
+                        {
+                            Console.WriteLine($"- {i.Quantidade}x - {i.Pedivel.Nome} - R$: {i.Subtotal}");
+
+                        }
+
+                        Console.WriteLine($"TOTAL R$: {pedido2.CalcularTotal()}");
+                        Console.WriteLine($"{pedido2.TipoDeEntrega}");
+            */
 
             Restaurante situacaoRestaurante2 = new Restaurante();
             situacaoRestaurante2.Aberto = true;
 
-            Pedido pedido2 = new Pedido(002, FormadePagamento.CartaoDeDebito, TipoDeEntrega.Retirada, situacaoRestaurante2);
+            CardapioDoDia cardapiododia = new CardapioDoDia(DateOnly.FromDateTime(DateTime.Now));
 
-            pedido2.AdicionarItem(item);
-            pedido2.AdicionarItem(item2);
-            pedido2.AdicionarItem(item3);
+            cardapiododia.AdicionarOpcao(suco);
+            cardapiododia.AdicionarOpcao(guarana);
+
+            Opcao arroz = new Opcao("Arroz", Categoria.Prato);
+            Opcao feijao = new Opcao("Feijao", Categoria.Prato);
+
+            cardapiododia.AdicionarOpcao(arroz);
+            cardapiododia.AdicionarOpcao(feijao);
+
+            cardapiododia.Publicar();
+
+            Pedido pedidodocardapio = new Pedido(004, FormadePagamento.Pix, TipoDeEntrega.Retirada, situacaoRestaurante2, cardapiododia);
+
+            pedidodocardapio.AdicionarItem(item);
+       
+            marmita1.AdicionarOpcao(arroz);
+            marmita1.AdicionarOpcao(feijao);
+
+            ItemDoPedido item3 = new ItemDoPedido(marmita1, 1);
+
+            pedidodocardapio.AdicionarItem(item3);
+
 
             Console.WriteLine("Informacoes do Pedido");
-            Console.WriteLine($"Pedido numero: {pedido2.Numero}, {pedido2.HoraPedido}, {pedido2.FormaDePagamento}");
+            Console.WriteLine($"Pedido numero: {pedidodocardapio.Numero}, {pedidodocardapio.HoraPedido}, {pedidodocardapio.FormaDePagamento}");
 
-            foreach (ItemDoPedido i in pedido2.Itens)
+            foreach (ItemDoPedido i in pedidodocardapio.Itens)
             {
                 Console.WriteLine($"- {i.Quantidade}x - {i.Pedivel.Nome} - R$: {i.Subtotal}");
 
             }
 
-            Console.WriteLine($"TOTAL R$: {pedido2.CalcularTotal()}");
-            Console.WriteLine($"{pedido2.TipoDeEntrega}");
-
-
+            Console.WriteLine($"TOTAL R$: {pedidodocardapio.CalcularTotal()}");
+            Console.WriteLine($"{pedidodocardapio.TipoDeEntrega}");
+           
 
 
 
