@@ -13,7 +13,7 @@ namespace KFRestaurante
             Opcao suco = new Opcao("Suco de laranja", Categoria.Bebida, 3);
             ItemDoPedido item2 = new ItemDoPedido(suco, 1);
 
-            TamanhoMarmita marmita = new TamanhoMarmita("G", 25);
+            TamanhoMarmita marmita = new TamanhoMarmita("G", 25, 3);
             Marmita marmita1 = new Marmita(marmita);
 
             //ItemDoPedido item3 = new ItemDoPedido(marmita1, 1);
@@ -137,6 +137,21 @@ namespace KFRestaurante
 
             }
 
+            TamanhoMarmita tamanhoP = new TamanhoMarmita("P", 18, 2);
+
+            Marmita marmitaP = new Marmita(tamanhoP);
+
+            try
+            {
+                marmitaP.AdicionarOpcao(feijao);
+                marmitaP.AdicionarOpcao(arroz);
+                marmitaP.AdicionarOpcao(suco);
+            } catch (Exception e )
+            {
+                Console.WriteLine("Erro: " + e.Message);
+            }
+
+            
             
         }
 

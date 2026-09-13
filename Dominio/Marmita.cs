@@ -21,7 +21,15 @@ namespace KFRestaurante.Dominio
          
         public void AdicionarOpcao(Opcao opcao)
         {
-            _opcoes.Add(opcao); 
+            if ( _opcoes.Count >= Tamanho.LimitedeComponente)
+            {
+                throw new InvalidOperationException("O limite de itens excedeu");
+            } else
+            {
+                _opcoes.Add(opcao);
+            }
+
+       
         }
 
         public decimal Preco => Tamanho.Preco;
