@@ -115,10 +115,29 @@ namespace KFRestaurante
 
             Console.WriteLine($"TOTAL R$: {pedidodocardapio.CalcularTotal()}");
             Console.WriteLine($"{pedidodocardapio.TipoDeEntrega}");
-           
 
 
+            /*teste 3*/
 
+            Opcao feijoada = new Opcao("Feijoada", Categoria.Acompanhamento);
+
+            Marmita marmita3 = new Marmita(marmita);
+
+            marmita3.AdicionarOpcao(feijoada);
+
+            ItemDoPedido item4 = new ItemDoPedido(marmita3, 1);
+
+            try
+            {
+                pedidodocardapio.AdicionarItem(item4);
+
+            } catch (Exception e)
+            {
+                Console.WriteLine("Erro: " + e.Message);
+
+            }
+
+            
         }
 
     }

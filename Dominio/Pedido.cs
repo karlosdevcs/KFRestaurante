@@ -30,7 +30,7 @@ namespace KFRestaurante.Dominio
                 {
                   if (!CardapioDoDia.Opcoes.Any(o => o.Nome == c.Nome))// dentro do Any, o o é cada opção do cardápio, e o c é o componente da vez
                     {
-                        throw new InvalidOperationException("Nao e possivel inserir");
+                        throw new InvalidOperationException("Esse componente nao esta disponivel hoje");
                     }
                    
                 }
