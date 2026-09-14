@@ -1,4 +1,5 @@
-﻿using KFRestaurante.Dominio;
+﻿
+using KFRestaurante.Dominio;
 
 namespace KFRestaurante
 {
@@ -94,14 +95,14 @@ namespace KFRestaurante
 
             Pedido pedidodocardapio = new Pedido(004, FormadePagamento.Pix, TipoDeEntrega.Retirada, situacaoRestaurante2, cardapiododia);
 
-            pedidodocardapio.AdicionarItem(item);
+            pedidodocardapio.AdicionarItem(arroz, 1);
        
             marmita1.AdicionarOpcao(arroz);
             marmita1.AdicionarOpcao(feijao);
 
             ItemDoPedido item3 = new ItemDoPedido(marmita1, 1);
 
-            pedidodocardapio.AdicionarItem(item3);
+            pedidodocardapio.AdicionarItem(feijao, 1);
 
 
             Console.WriteLine("Informacoes do Pedido");
@@ -109,7 +110,7 @@ namespace KFRestaurante
 
             foreach (ItemDoPedido i in pedidodocardapio.Itens)
             {
-                Console.WriteLine($"- {i.Quantidade}x - {i.Pedivel.Nome} - R$: {i.Subtotal}");
+                Console.WriteLine($"- {i.Quantidade}x - {i.Nome} - R$: {i.Subtotal}");
 
             }
 
@@ -129,7 +130,7 @@ namespace KFRestaurante
 
             try
             {
-                pedidodocardapio.AdicionarItem(item4);
+                pedidodocardapio.AdicionarItem(feijoada, 1);
 
             } catch (Exception e)
             {

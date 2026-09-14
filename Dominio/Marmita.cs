@@ -8,7 +8,9 @@ namespace KFRestaurante.Dominio
 {
     public class Marmita: IPedivel
     {
-        public TamanhoMarmita Tamanho {get; private set;}
+        public int Id { get; set; }
+
+        public TamanhoMarmita Tamanho { get; private set; } = null;
 
         private List<Opcao> _opcoes = new List<Opcao>(); //list porque tem add e remove, e onde os componentes moram 
 
@@ -35,5 +37,7 @@ namespace KFRestaurante.Dominio
         public decimal Preco => Tamanho.Preco;
 
         public string Nome => $"Marmita {Tamanho.Nome}";
+
+        private Marmita() { }
     }
 }

@@ -10,8 +10,8 @@ namespace KFRestaurante.Dominio
 
 	public class CardapioDoDia
 	{
-
-		public DateOnly DataPublicacao { get; set; }
+        public int Id { get; set; }
+        public DateOnly DataPublicacao { get; set; }
 		public SituacaoCardapio Situacao { get; set; }
 
 		private List<Opcao> _opcoes = new List<Opcao>();
@@ -53,6 +53,7 @@ namespace KFRestaurante.Dominio
 
 		}
 
+        private CardapioDoDia() { }
 
 
     }

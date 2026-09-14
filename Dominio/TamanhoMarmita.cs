@@ -8,6 +8,8 @@ namespace KFRestaurante.Dominio
 {
     public class TamanhoMarmita
     {
+
+        public int Id { get; set; }
         public string Nome { get; set; }
         public decimal Preco { get; set; }
 
@@ -19,5 +21,7 @@ namespace KFRestaurante.Dominio
             this.Preco = preco;
             this.LimitedeComponente = limitedecomponente;
         }
+
+        private TamanhoMarmita() { }
     }
 }

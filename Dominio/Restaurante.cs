@@ -8,12 +8,15 @@ namespace KFRestaurante.Dominio
 {
     public class Restaurante
     {
+        public int Id { get; set; }
         public bool Aberto { get; set; }
 
         public Restaurante()
         {
             this.Aberto = false;
         }
+
+       
 
 
     }

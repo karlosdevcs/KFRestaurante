@@ -9,8 +9,14 @@ namespace KFRestaurante.Dominio
 {
     public class ItemDoPedido
     {
-        public IPedivel Pedivel { get; private set; }
-        public int Quantidade { get; set; }
+
+        public int Id { get; set; }
+
+        //public IPedivel Pedivel { get; private set; } o ItemDoPedido guardava uma referência viva a algo que muda, quando o correto é guardar uma foto do momento da compra.
+
+        public string Nome { get; private set; }
+
+        public int Quantidade { get; private set; }
         public decimal PrecoUnitario { get; private set; }
 
         public decimal Subtotal => Quantidade * PrecoUnitario;
@@ -19,9 +25,11 @@ namespace KFRestaurante.Dominio
         public ItemDoPedido(IPedivel pedivel, int quantidade)
         {
             this.PrecoUnitario = pedivel.Preco;
-            this.Pedivel = pedivel;
             this.Quantidade = quantidade;
+            this.Nome = pedivel.Nome;
           
         }
+
+        private ItemDoPedido() { }
     }
 }

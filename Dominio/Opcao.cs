@@ -8,7 +8,9 @@ namespace KFRestaurante.Dominio
 {
     public class Opcao: IPedivel
     {
-        public string Nome { get; set; }
+
+        public int Id { get; set; }
+        public string Nome { get; set; } = null;
         public Categoria Categoria { get; set; }
         public bool Esgotado { get; set; }
         public decimal Preco { get; set; }
@@ -19,6 +21,8 @@ namespace KFRestaurante.Dominio
             this.Categoria = categoria;
             this.Preco = preco;
         }
+
+        private Opcao() { }
 
     }
 }
