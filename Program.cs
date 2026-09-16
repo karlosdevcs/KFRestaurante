@@ -1,5 +1,8 @@
 ﻿
 using KFRestaurante.Dominio;
+using KFRestaurante.Infraestrutura;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 
 namespace KFRestaurante
 {
@@ -152,6 +155,24 @@ namespace KFRestaurante
                 Console.WriteLine("Erro: " + e.Message);
             }
 
+            KFContext contexto = new KFContext();
+
+            contexto.Opcoes.Add(arroz);
+
+            try
+            {
+                int linhas = contexto.SaveChanges();
+                Console.WriteLine(linhas);
+
+            } catch (DbUpdateException e)
+            {
+                Console.WriteLine("Erro:" + e.InnerException.Message);
+            }
+             
+            foreach (Opcao o in contexto.Opcoes)
+            {
+                Console.WriteLine($"{o.Id} - {o.Nome}");
+            }
             
             
         }

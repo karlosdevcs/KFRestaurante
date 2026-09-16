@@ -24,6 +24,7 @@ namespace KFRestaurante.Infraestrutura
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             optionsBuilder.UseNpgsql("Host=localhost;Port=5432;Database=kfrestaurante;Username=postgres;Password=***REMOVIDO***");
+            optionsBuilder.LogTo(Console.WriteLine);
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
