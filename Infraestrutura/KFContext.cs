@@ -43,6 +43,17 @@ namespace KFRestaurante.Infraestrutura
             modelBuilder.Entity<CardapioDoDia>()
                 .HasMany(c => c.Opcoes)
                 .WithMany();
+
+            foreach (var entidade in modelBuilder.Model.GetEntityTypes())
+            {
+                entidade.SetTableName(entidade.GetTableName().ToLower());
+
+                foreach (var propriedade in entidade.GetProperties())
+                {
+                    propriedade.SetColumnName(propriedade.GetColumnName().ToLower());
+                }
+            }
+
         }
 
 

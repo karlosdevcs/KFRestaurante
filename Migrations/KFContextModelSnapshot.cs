@@ -25,134 +25,157 @@ namespace KFRestaurante.Migrations
             modelBuilder.Entity("CardapioDoDiaOpcao", b =>
                 {
                     b.Property<int>("CardapioDoDiaId")
-                        .HasColumnType("integer");
+                        .HasColumnType("integer")
+                        .HasColumnName("cardapiododiaid");
 
                     b.Property<int>("OpcoesId")
-                        .HasColumnType("integer");
+                        .HasColumnType("integer")
+                        .HasColumnName("opcoesid");
 
                     b.HasKey("CardapioDoDiaId", "OpcoesId");
 
                     b.HasIndex("OpcoesId");
 
-                    b.ToTable("CardapioDoDiaOpcao");
+                    b.ToTable("cardapiododiaopcao");
                 });
 
             modelBuilder.Entity("KFRestaurante.Dominio.CardapioDoDia", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<DateOnly>("DataPublicacao")
-                        .HasColumnType("date");
+                        .HasColumnType("date")
+                        .HasColumnName("datapublicacao");
 
                     b.Property<int>("Situacao")
-                        .HasColumnType("integer");
+                        .HasColumnType("integer")
+                        .HasColumnName("situacao");
 
                     b.HasKey("Id");
 
-                    b.ToTable("CardapiosDoDia");
+                    b.ToTable("cardapiosdodia");
                 });
 
             modelBuilder.Entity("KFRestaurante.Dominio.ItemDoPedido", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Nome")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("text")
+                        .HasColumnName("nome");
 
                     b.Property<int?>("PedidoId")
-                        .HasColumnType("integer");
+                        .HasColumnType("integer")
+                        .HasColumnName("pedidoid");
 
                     b.Property<decimal>("PrecoUnitario")
-                        .HasColumnType("numeric");
+                        .HasColumnType("numeric")
+                        .HasColumnName("precounitario");
 
                     b.Property<int>("Quantidade")
-                        .HasColumnType("integer");
+                        .HasColumnType("integer")
+                        .HasColumnName("quantidade");
 
                     b.HasKey("Id");
 
                     b.HasIndex("PedidoId");
 
-                    b.ToTable("ItemDoPedido");
+                    b.ToTable("itemdopedido");
                 });
 
             modelBuilder.Entity("KFRestaurante.Dominio.Marmita", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<int>("TamanhoId")
-                        .HasColumnType("integer");
+                        .HasColumnType("integer")
+                        .HasColumnName("tamanhoid");
 
                     b.HasKey("Id");
 
                     b.HasIndex("TamanhoId");
 
-                    b.ToTable("Marmitas");
+                    b.ToTable("marmitas");
                 });
 
             modelBuilder.Entity("KFRestaurante.Dominio.Opcao", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<int>("Categoria")
-                        .HasColumnType("integer");
+                        .HasColumnType("integer")
+                        .HasColumnName("categoria");
 
                     b.Property<bool>("Esgotado")
-                        .HasColumnType("boolean");
+                        .HasColumnType("boolean")
+                        .HasColumnName("esgotado");
 
                     b.Property<string>("Nome")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("text")
+                        .HasColumnName("nome");
 
                     b.Property<decimal>("Preco")
-                        .HasColumnType("numeric");
+                        .HasColumnType("numeric")
+                        .HasColumnName("preco");
 
                     b.HasKey("Id");
 
                     b.HasIndex("Nome")
                         .IsUnique();
 
-                    b.ToTable("Opcoes");
+                    b.ToTable("opcoes");
                 });
 
             modelBuilder.Entity("KFRestaurante.Dominio.Pedido", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<int>("CardapioDoDiaId")
-                        .HasColumnType("integer");
+                        .HasColumnType("integer")
+                        .HasColumnName("cardapiododiaid");
 
                     b.Property<int>("FormaDePagamento")
-                        .HasColumnType("integer");
+                        .HasColumnType("integer")
+                        .HasColumnName("formadepagamento");
 
                     b.Property<DateTime>("HoraPedido")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("horapedido");
 
                     b.Property<int>("Numero")
-                        .HasColumnType("integer");
+                        .HasColumnType("integer")
+                        .HasColumnName("numero");
 
                     b.Property<int>("TipoDeEntrega")
-                        .HasColumnType("integer");
+                        .HasColumnType("integer")
+                        .HasColumnName("tipodeentrega");
 
                     b.HasKey("Id");
 
@@ -161,61 +184,69 @@ namespace KFRestaurante.Migrations
                     b.HasIndex("Numero")
                         .IsUnique();
 
-                    b.ToTable("Pedidos");
+                    b.ToTable("pedidos");
                 });
 
             modelBuilder.Entity("KFRestaurante.Dominio.Restaurante", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<bool>("Aberto")
-                        .HasColumnType("boolean");
+                        .HasColumnType("boolean")
+                        .HasColumnName("aberto");
 
                     b.HasKey("Id");
 
-                    b.ToTable("Restaurantes");
+                    b.ToTable("restaurantes");
                 });
 
             modelBuilder.Entity("KFRestaurante.Dominio.TamanhoMarmita", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<int>("LimitedeComponente")
-                        .HasColumnType("integer");
+                        .HasColumnType("integer")
+                        .HasColumnName("limitedecomponente");
 
                     b.Property<string>("Nome")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("text")
+                        .HasColumnName("nome");
 
                     b.Property<decimal>("Preco")
-                        .HasColumnType("numeric");
+                        .HasColumnType("numeric")
+                        .HasColumnName("preco");
 
                     b.HasKey("Id");
 
-                    b.ToTable("TamanhosMarmita");
+                    b.ToTable("tamanhosmarmita");
                 });
 
             modelBuilder.Entity("MarmitaOpcao", b =>
                 {
                     b.Property<int>("MarmitaId")
-                        .HasColumnType("integer");
+                        .HasColumnType("integer")
+                        .HasColumnName("marmitaid");
 
                     b.Property<int>("OpcoesId")
-                        .HasColumnType("integer");
+                        .HasColumnType("integer")
+                        .HasColumnName("opcoesid");
 
                     b.HasKey("MarmitaId", "OpcoesId");
 
                     b.HasIndex("OpcoesId");
 
-                    b.ToTable("MarmitaOpcao");
+                    b.ToTable("marmitaopcao");
                 });
 
             modelBuilder.Entity("CardapioDoDiaOpcao", b =>
