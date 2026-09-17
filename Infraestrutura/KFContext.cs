@@ -20,12 +20,11 @@ namespace KFRestaurante.Infraestrutura
 
         public DbSet<Restaurante> Restaurantes { get; set; }
 
-
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        public KFContext(DbContextOptions<KFContext> options) : base(options)
         {
-            optionsBuilder.UseNpgsql("Host=localhost;Port=5432;Database=kfrestaurante;Username=postgres;Password=***REMOVIDO***");
-            optionsBuilder.LogTo(Console.WriteLine);
+
         }
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
