@@ -4,6 +4,9 @@ using KFRestaurante.Infraestrutura;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using System.Net.Security;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+
 
 namespace KFRestaurante
 {
@@ -12,9 +15,20 @@ namespace KFRestaurante
         static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+
+            builder.Services.ConfigureHttpJsonOptions(options =>
+            {
+                options.SerializerOptions.Converters.Add(new JsonStringEnumConverter());
+               
+            });
+
             var connectionString = builder.Configuration.GetConnectionString("KFRestaurante");
             builder.Services.AddDbContext<KFContext>(options => options.UseNpgsql(connectionString));
             var app = builder.Build();
+
+                
+
+
 
             app.MapGet("/opcoes", (KFContext contexto) => {
 
@@ -35,9 +49,11 @@ namespace KFRestaurante
 
                 contexto.Add(opcao1);
 
-                contexto.SaveChanges();
+                contexto.SaveChanges(); //--save changes nao manda so INSERT, ele le de volta o id gerado pelo pg e escreve na inst. do change tracker. 
 
-                return Results.Created($"/opcoes/{opcao1.Id}", opcao1);
+
+                return Results.Created($"/opcoes/{opcao1.Id}", OpcaoResponse.De(opcao1));
+
             });
 
             app.MapGet("/opcoes/{id}", (int id, KFContext contexto) =>
@@ -50,9 +66,8 @@ namespace KFRestaurante
                     return Results.NotFound($"A opção com o id '{id}' não foi encontrada.");
                 }
 
-                OpcaoResponse opcaoResponse = new OpcaoResponse(opcao.Id, opcao.Nome, opcao.Categoria, opcao.Preco, opcao.Esgotado);
 
-                return Results.Ok(opcaoResponse);
+                return Results.Ok(OpcaoResponse.De(opcao));
                
             });
 
