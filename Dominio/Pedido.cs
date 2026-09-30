@@ -17,7 +17,7 @@ namespace KFRestaurante.Dominio
         
         public TipoDeEntrega TipoDeEntrega { get; set; }
 
-        public CardapioDoDia CardapioDoDia { get; private set; } = null;
+        public CardapioDoDia CardapioDoDia { get; private set; } = null!;
 
         private List<ItemDoPedido> _itens = new List<ItemDoPedido>();
         public IEnumerable<ItemDoPedido> Itens => _itens;

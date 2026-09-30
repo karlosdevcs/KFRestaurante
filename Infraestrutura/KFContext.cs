@@ -46,7 +46,15 @@ namespace KFRestaurante.Infraestrutura
 
             foreach (var entidade in modelBuilder.Model.GetEntityTypes())
             {
-                entidade.SetTableName(entidade.GetTableName().ToLower());
+
+                string? nomeDaTabela = entidade.GetTableName();
+
+                if (nomeDaTabela != null) 
+                { 
+                    
+                    entidade.SetTableName(nomeDaTabela.ToLower());
+                
+                }
 
                 foreach (var propriedade in entidade.GetProperties())
                 {

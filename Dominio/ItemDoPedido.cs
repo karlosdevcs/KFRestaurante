@@ -14,7 +14,7 @@ namespace KFRestaurante.Dominio
 
         //public IPedivel Pedivel { get; private set; } o ItemDoPedido guardava uma referência viva a algo que muda, quando o correto é guardar uma foto do momento da compra.
 
-        public string Nome { get; private set; }
+        public string Nome { get; private set; } = null!;
 
         public int Quantidade { get; private set; }
         public decimal PrecoUnitario { get; private set; }

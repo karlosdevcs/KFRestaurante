@@ -10,7 +10,7 @@ namespace KFRestaurante.Dominio
     {
         public int Id { get; set; }
 
-        public TamanhoMarmita Tamanho { get; private set; } = null;
+        public TamanhoMarmita Tamanho { get; private set; } = null!;
 
         private List<Opcao> _opcoes = new List<Opcao>(); //list porque tem add e remove, e onde os componentes moram 
 

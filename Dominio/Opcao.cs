@@ -9,11 +9,11 @@ namespace KFRestaurante.Dominio
     public class Opcao: IPedivel
     {
 
-        public int Id { get; set; }
-        public string Nome { get; set; } = null;
-        public Categoria Categoria { get; set; }
-        public bool Esgotado { get; set; }
-        public decimal Preco { get; set; }
+        public int Id { get; private set; }
+        public string Nome { get; private set; } = null!;
+        public Categoria Categoria { get; private set; }
+        public bool Esgotado { get; private set; }
+        public decimal Preco { get; private set; }
 
         public Opcao(string nome, Categoria categoria, decimal preco = 0)
         {

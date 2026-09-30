@@ -42,6 +42,8 @@ namespace KFRestaurante
 
             });
 
+            
+
 
             app.MapPost("/opcoes", (CriarOpcaoRequest request, KFContext contexto) =>
             {
@@ -64,7 +66,7 @@ namespace KFRestaurante
             app.MapGet("/opcoes/{id}", (int id, KFContext contexto) =>
             {
 
-                Opcao opcao = contexto.Opcoes.Find(id);
+                Opcao? opcao = contexto.Opcoes.Find(id);
 
                 if (opcao == null)
                 {

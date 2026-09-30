@@ -9,11 +9,11 @@ namespace KFRestaurante.Dominio
     public class TamanhoMarmita
     {
 
-        public int Id { get; set; }
-        public string Nome { get; set; }
-        public decimal Preco { get; set; }
+        public int Id { get; private set; }
+        public string Nome { get; private set; } = null!;
+        public decimal Preco { get; private set; }
 
-        public int LimitedeComponente { get; set; }
+        public int LimitedeComponente { get; private set; }
 
         public TamanhoMarmita(string nome, decimal preco, int limitedecomponente)
         {
