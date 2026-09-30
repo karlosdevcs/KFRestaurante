@@ -24,6 +24,11 @@ namespace KFRestaurante
 
             var connectionString = builder.Configuration.GetConnectionString("KFRestaurante");
             builder.Services.AddDbContext<KFContext>(options => options.UseNpgsql(connectionString));
+
+            builder.Services.AddEndpointsApiExplorer();
+
+            builder.Services.AddSwaggerGen();
+
             var app = builder.Build();
 
                 
@@ -32,7 +37,7 @@ namespace KFRestaurante
 
             app.MapGet("/opcoes", (KFContext contexto) => {
 
-                return contexto.Opcoes;
+                return contexto.Opcoes.Select(opcao => OpcaoResponse.De(opcao)); 
 
 
             });
@@ -70,6 +75,9 @@ namespace KFRestaurante
                 return Results.Ok(OpcaoResponse.De(opcao));
                
             });
+
+            app.UseSwagger();
+            app.UseSwaggerUI();
 
             app.Run();
         }
