@@ -11,6 +11,13 @@
     <Content Include="Properties\launchSettings.json" />
   </ItemGroup>
 
+  <!-- o projeto de testes mora numa subpasta: sem isto a API tentaria compilar os testes junto -->
+  <ItemGroup>
+    <Compile Remove="KFRestaurante.Tests\**" />
+    <Content Remove="KFRestaurante.Tests\**" />
+    <None Remove="KFRestaurante.Tests\**" />
+  </ItemGroup>
+
   <ItemGroup>
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.11" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.11">
