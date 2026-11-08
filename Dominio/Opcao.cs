@@ -22,6 +22,14 @@ namespace KFRestaurante.Dominio
             this.Preco = preco;
         }
 
+        // pedidos ja feitos nao mudam: o ItemDoPedido guarda a foto (nome e preco) do momento da compra
+        public void Alterar(string nome, Categoria categoria, decimal preco)
+        {
+            this.Nome = nome;
+            this.Categoria = categoria;
+            this.Preco = preco;
+        }
+
         public void AlterarEsgotado(bool esgotado)
         {
             this.Esgotado = esgotado; // marcar o que ja esta marcado nao da erro (idempotente)

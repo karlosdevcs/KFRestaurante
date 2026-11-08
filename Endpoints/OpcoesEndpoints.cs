@@ -58,6 +58,31 @@ namespace KFRestaurante.Endpoints
                 .Produces<OpcaoResponse>(StatusCodes.Status200OK)
                 .ProducesProblem(StatusCodes.Status404NotFound);
 
+            app.MapPut("/opcoes/{id}", async (int id, AlterarOpcaoRequest request, KFContext contexto) =>
+            {
+                Opcao? opcao = await contexto.Opcoes.FindAsync(id);
+
+                if (opcao == null)
+                {
+                    return Results.Problem(detail: $"A opção com o id '{id}' não foi encontrada.", statusCode: StatusCodes.Status404NotFound);
+                }
+
+                // outra opcao (id diferente) ja usa esse nome; renomear para o proprio nome e permitido
+                if (await contexto.Opcoes.AnyAsync(outra => outra.Nome == request.Nome && outra.Id != id))
+                {
+                    return Results.Problem(detail: $"A opção com o nome '{request.Nome}' já existe.", statusCode: StatusCodes.Status409Conflict);
+                }
+
+                opcao.Alterar(request.Nome, request.Categoria, request.Preco);
+                await contexto.SaveChangesAsync();
+
+                return Results.Ok(OpcaoResponse.De(opcao));
+            })
+                .Produces<OpcaoResponse>(StatusCodes.Status200OK)
+                .ProducesProblem(StatusCodes.Status400BadRequest)
+                .ProducesProblem(StatusCodes.Status404NotFound)
+                .ProducesProblem(StatusCodes.Status409Conflict);
+
             app.MapPatch("/opcoes/{id}/esgotado", async (int id, AlterarEsgotadoRequest request, KFContext contexto) =>
             {
                 Opcao? opcao = await contexto.Opcoes.FindAsync(id);
