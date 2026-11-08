@@ -24,6 +24,8 @@ namespace KFRestaurante.Dominio
 
         public Opcao(string nome, Categoria categoria, decimal? preco = null)
         {
+            Validar(nome, categoria, preco);
+
             this.Nome = nome;
             this.Categoria = categoria;
             this.Preco = preco;
@@ -32,9 +34,25 @@ namespace KFRestaurante.Dominio
         // pedidos ja feitos nao mudam: o ItemDoPedido guarda a foto (nome e preco) do momento da compra
         public void Alterar(string nome, Categoria categoria, decimal? preco)
         {
+            Validar(nome, categoria, preco);
+
             this.Nome = nome;
             this.Categoria = categoria;
             this.Preco = preco;
+        }
+
+        private static void Validar(string nome, Categoria categoria, decimal? preco)
+        {
+            if (preco < 0)
+            {
+                throw new DominioException($"O preço de {nome} não pode ser negativo. Valor recebido: {preco}.");
+            }
+
+            // bebida e sobremesa nao entram em marmita: sem preco, nao teria como serem vendidas
+            if (!categoria.EhComponenteDeMarmita() && preco == null)
+            {
+                throw new DominioException($"{nome} é {categoria} e precisa ter preço, porque só pode ser vendido avulso.");
+            }
         }
 
         public void AlterarEsgotado(bool esgotado)
