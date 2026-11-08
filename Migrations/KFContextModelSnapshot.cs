@@ -100,7 +100,7 @@ namespace KFRestaurante.Migrations
 
                     b.HasIndex("PedidoId");
 
-                    b.ToTable("itemdopedido");
+                    b.ToTable("itensdopedido");
                 });
 
             modelBuilder.Entity("KFRestaurante.Dominio.Marmita", b =>

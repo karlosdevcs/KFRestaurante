@@ -14,7 +14,7 @@ namespace KFRestaurante.Infraestrutura
         public DbSet<TamanhoMarmita> TamanhosMarmita { get; set; }
         public DbSet<CardapioDoDia> CardapiosDoDia { get; set; }
         public DbSet<Pedido> Pedidos { get; set; }
-        public DbSet<ItemDoPedido> ItemDoPedido { get; set; }
+        public DbSet<ItemDoPedido> ItensDoPedido { get; set; }
 
         public DbSet<Marmita> Marmitas { get; set; }
 
