@@ -19,7 +19,7 @@ namespace KFRestaurante
             builder.Services.ConfigureHttpJsonOptions(options =>
             {
                 options.SerializerOptions.Converters.Add(new JsonStringEnumConverter());
-               
+
             });
 
             var connectionString = builder.Configuration.GetConnectionString("KFRestaurante");
@@ -31,18 +31,18 @@ namespace KFRestaurante
 
             var app = builder.Build();
 
-                
+
 
 
 
             app.MapGet("/opcoes", (KFContext contexto) => {
 
-                return contexto.Opcoes.Select(opcao => OpcaoResponse.De(opcao)); 
+                return contexto.Opcoes.Select(opcao => OpcaoResponse.De(opcao));
 
 
             });
 
-            
+
 
 
             app.MapPost("/opcoes", (CriarOpcaoRequest request, KFContext contexto) =>
@@ -75,13 +75,44 @@ namespace KFRestaurante
 
 
                 return Results.Ok(OpcaoResponse.De(opcao));
-               
+
             });
 
-            app.UseSwagger();
-            app.UseSwaggerUI();
+            app.MapGet("/tamanhos", (KFContext contexto) =>
+            {
+                return contexto.TamanhosMarmita.Select(tamanho => TamanhoResponse.De(tamanho));
+            });
 
-            app.Run();
-        }
+            app.MapGet("/tamanhos/{id}", (int id, KFContext contexto) =>
+                {
+                    TamanhoMarmita? tamanho = contexto.TamanhosMarmita.Find(id);
+                    if (tamanho == null)
+                    {
+                        return Results.NotFound($"O tamanho com o id '{id}' não foi encontrado.");
+                    }
+                    return Results.Ok(TamanhoResponse.De(tamanho));
+                });
+
+
+            app.MapPost("/tamanhos", (CriarTamanhoRequest request, KFContext contexto) =>
+            {
+                if (contexto.TamanhosMarmita.Any(tamanho => tamanho.Nome == request.Nome))
+                {
+                    return Results.Conflict($"O tamanho com o nome '{request.Nome}' já existe.");
+                }
+
+                TamanhoMarmita tamanho1 = new TamanhoMarmita(request.Nome, request.Preco, request.LimitedeComponente);
+                contexto.Add(tamanho1);
+                contexto.SaveChanges();
+                return Results.Created($"/tamanhos/{tamanho1.Id}", TamanhoResponse.De(tamanho1));
+            }); 
+           
+
+
+                app.UseSwagger();
+                app.UseSwaggerUI();
+
+                app.Run();
+            }
     }
 }
