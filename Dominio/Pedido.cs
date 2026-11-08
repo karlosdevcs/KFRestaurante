@@ -27,8 +27,14 @@ namespace KFRestaurante.Dominio
         public void AdicionarItem(IPedivel pedivel, int quantidade)
         {
 
-            if (pedivel is Marmita marmita) //o tipo disso e marmita? se sim, faz o foreach guardando na variavel 
+            if (pedivel is Marmita marmita) //o tipo disso e marmita? se sim, faz o foreach guardando na variavel
             {
+                // a marmita nasce vazia e vai sendo montada; so quando entra no pedido ela precisa estar completa
+                if (!marmita.Opcoes.Any())
+                {
+                    throw new DominioException($"A {marmita.Nome} precisa ter ao menos um componente.");
+                }
+
                 foreach (Opcao c in marmita.Opcoes)
                 {
                   if (!CardapioDoDia.Opcoes.Any(o => o.Nome == c.Nome))// dentro do Any, o o é cada opção do cardápio, e o c é o componente da vez
