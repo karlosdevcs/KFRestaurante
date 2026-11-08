@@ -4,6 +4,7 @@ namespace KFRestaurante.DTOs
 {
     public record CriarPedidoRequest(
         string NomeCliente,
+        string Telefone,
         int CardapioId,
         List<CriarItemDoPedidoRequest> Itens,
         FormadePagamento FormaDePagamento,

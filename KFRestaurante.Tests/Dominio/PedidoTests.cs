@@ -30,7 +30,7 @@ namespace KFRestaurante.Tests.Dominio
 
         private Pedido NovoPedido()
         {
-            return new Pedido("Maria", FormadePagamento.Pix, null, TipoDeEntrega.Retirada, null, null, null, RestauranteAberto(), CardapioPublicado());
+            return new Pedido("Maria", "31999999999", FormadePagamento.Pix, null, TipoDeEntrega.Retirada, null, null, null, RestauranteAberto(), CardapioPublicado());
         }
 
         // ---------- caminho feliz ----------
@@ -81,7 +81,7 @@ namespace KFRestaurante.Tests.Dominio
         [Fact]
         public void Entrega_guarda_endereco_sem_espacos_nas_pontas()
         {
-            Pedido pedido = new Pedido("Maria", FormadePagamento.Pix, null, TipoDeEntrega.Entrega, "  Rua A, 10  ", null, null, RestauranteAberto(), CardapioPublicado());
+            Pedido pedido = new Pedido("Maria", "31999999999", FormadePagamento.Pix, null, TipoDeEntrega.Entrega, "  Rua A, 10  ", null, null, RestauranteAberto(), CardapioPublicado());
 
             Assert.Equal("Rua A, 10", pedido.Endereco);
         }
@@ -89,7 +89,7 @@ namespace KFRestaurante.Tests.Dominio
         [Fact]
         public void Retirada_descarta_endereco()
         {
-            Pedido pedido = new Pedido("Maria", FormadePagamento.Dinheiro, null, TipoDeEntrega.Retirada, "Rua B", null, null, RestauranteAberto(), CardapioPublicado());
+            Pedido pedido = new Pedido("Maria", "31999999999", FormadePagamento.Dinheiro, null, TipoDeEntrega.Retirada, "Rua B", null, null, RestauranteAberto(), CardapioPublicado());
 
             Assert.Null(pedido.Endereco);
         }
@@ -108,7 +108,7 @@ namespace KFRestaurante.Tests.Dominio
         public void Recusa_com_restaurante_fechado()
         {
             DominioException erro = Assert.Throws<DominioException>(() =>
-                new Pedido("Maria", FormadePagamento.Pix, null, TipoDeEntrega.Retirada, null, null, null, new Restaurante(), CardapioPublicado()));
+                new Pedido("Maria", "31999999999", FormadePagamento.Pix, null, TipoDeEntrega.Retirada, null, null, null, new Restaurante(), CardapioPublicado()));
 
             Assert.Contains("fechado", erro.Message);
         }
@@ -120,7 +120,7 @@ namespace KFRestaurante.Tests.Dominio
             rascunho.AdicionarOpcao(_arroz);
 
             Assert.Throws<DominioException>(() =>
-                new Pedido("Maria", FormadePagamento.Pix, null, TipoDeEntrega.Retirada, null, null, null, RestauranteAberto(), rascunho));
+                new Pedido("Maria", "31999999999", FormadePagamento.Pix, null, TipoDeEntrega.Retirada, null, null, null, RestauranteAberto(), rascunho));
         }
 
         [Fact]
@@ -130,7 +130,7 @@ namespace KFRestaurante.Tests.Dominio
             cardapio.Fechar();
 
             DominioException erro = Assert.Throws<DominioException>(() =>
-                new Pedido("Maria", FormadePagamento.Pix, null, TipoDeEntrega.Retirada, null, null, null, RestauranteAberto(), cardapio));
+                new Pedido("Maria", "31999999999", FormadePagamento.Pix, null, TipoDeEntrega.Retirada, null, null, null, RestauranteAberto(), cardapio));
 
             Assert.Contains("Fechado", erro.Message);
         }
@@ -142,7 +142,7 @@ namespace KFRestaurante.Tests.Dominio
         public void Recusa_entrega_sem_endereco(string? endereco)
         {
             Assert.Throws<DominioException>(() =>
-                new Pedido("Maria", FormadePagamento.Pix, null, TipoDeEntrega.Entrega, endereco, null, null, RestauranteAberto(), CardapioPublicado()));
+                new Pedido("Maria", "31999999999", FormadePagamento.Pix, null, TipoDeEntrega.Entrega, endereco, null, null, RestauranteAberto(), CardapioPublicado()));
         }
 
         [Fact]
@@ -238,7 +238,7 @@ namespace KFRestaurante.Tests.Dominio
         private Pedido PedidoCom(FormadePagamento pagamento = FormadePagamento.Pix, decimal? troco = null,
             TipoDeEntrega entrega = TipoDeEntrega.Entrega, string? referencia = null, string? observacao = null, string nome = "Maria")
         {
-            return new Pedido(nome, pagamento, troco, entrega, "Rua A, 10", referencia, observacao, RestauranteAberto(), CardapioPublicado());
+            return new Pedido(nome, "31999999999", pagamento, troco, entrega, "Rua A, 10", referencia, observacao, RestauranteAberto(), CardapioPublicado());
         }
 
         [Theory]
@@ -331,6 +331,36 @@ namespace KFRestaurante.Tests.Dominio
             DominioException erro = Assert.Throws<DominioException>(() => pedido.Finalizar());
 
             Assert.Contains("ao menos um item", erro.Message);
+        }
+
+        // ---------- telefone ----------
+
+        private Pedido PedidoComTelefone(string telefone)
+        {
+            return new Pedido("Maria", telefone, FormadePagamento.Pix, null, TipoDeEntrega.Retirada, null, null, null, RestauranteAberto(), CardapioPublicado());
+        }
+
+        [Theory]
+        [InlineData("31999999999", "31999999999")]      // celular: 11 digitos
+        [InlineData("(31) 99999-9999", "31999999999")]  // formatado
+        [InlineData("3133334444", "3133334444")]        // fixo: 10 digitos
+        public void Guarda_telefone_so_com_digitos(string informado, string guardado)
+        {
+            Pedido pedido = PedidoComTelefone(informado);
+
+            Assert.Equal(guardado, pedido.Telefone);
+        }
+
+        [Theory]
+        [InlineData("999999999")]      // 9 digitos: sem DDD
+        [InlineData("5531999999999")]  // 13 digitos: com codigo do pais
+        [InlineData("")]
+        [InlineData(null)]
+        public void Recusa_telefone_fora_de_10_ou_11_digitos(string? telefone)
+        {
+            DominioException erro = Assert.Throws<DominioException>(() => PedidoComTelefone(telefone!));
+
+            Assert.Contains("Telefone inválido", erro.Message);
         }
     }
 }

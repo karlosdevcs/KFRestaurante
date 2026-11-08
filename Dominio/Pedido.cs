@@ -22,6 +22,7 @@ namespace KFRestaurante.Dominio
 
         // tudo abaixo existe para a loja nao precisar perguntar nada no WhatsApp
         public string NomeCliente { get; private set; } = null!;
+        public string Telefone { get; private set; } = null!;  // so digitos, com DDD: 31999999999
         public decimal? TrocoPara { get; private set; }     // so em dinheiro; null = nao precisa de troco
         public string? Referencia { get; private set; }     // so em entrega: "portao azul, ao lado da padaria"
         public string? Observacao { get; private set; }     // livre: "sem cebola"
@@ -82,12 +83,20 @@ namespace KFRestaurante.Dominio
         }
 
         // Numero nao vem de fora: o banco gera pela sequence pedidos_numero_seq no INSERT (ver KFContext)
-        public Pedido(string nomeCliente, FormadePagamento formadepagamento, decimal? trocoPara, TipoDeEntrega tipodeentrega, string? endereco, string? referencia, string? observacao, Restaurante restaurante, CardapioDoDia cardapio)
+        public Pedido(string nomeCliente, string telefone, FormadePagamento formadepagamento, decimal? trocoPara, TipoDeEntrega tipodeentrega, string? endereco, string? referencia, string? observacao, Restaurante restaurante, CardapioDoDia cardapio)
 
         {
             if (string.IsNullOrWhiteSpace(nomeCliente))
             {
                 throw new DominioException("Informe o nome do cliente.");
+            }
+
+            // aceita "(31) 99999-9999" e guarda "31999999999"
+            string digitosTelefone = new string((telefone ?? "").Where(char.IsDigit).ToArray());
+
+            if (digitosTelefone.Length < 10 || digitosTelefone.Length > 11)
+            {
+                throw new DominioException($"Telefone inválido: '{telefone}'. Informe com DDD, ex.: (31) 99999-9999.");
             }
 
             if (!restaurante.Aberto)
@@ -110,6 +119,7 @@ namespace KFRestaurante.Dominio
             this.Referencia = tipodeentrega == TipoDeEntrega.Entrega ? TextoOuNulo(referencia) : null;
             this.TrocoPara = formadepagamento == FormadePagamento.Dinheiro ? trocoPara : null; // pix/cartao nao tem troco
             this.NomeCliente = nomeCliente.Trim();
+            this.Telefone = digitosTelefone;
             this.Observacao = TextoOuNulo(observacao);
             this.CardapioDoDia = cardapio;
 

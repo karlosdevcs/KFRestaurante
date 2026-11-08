@@ -201,6 +201,11 @@ namespace KFRestaurante.Migrations
                         .HasColumnType("text")
                         .HasColumnName("referencia");
 
+                    b.Property<string>("Telefone")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("telefone");
+
                     b.Property<int>("TipoDeEntrega")
                         .HasColumnType("integer")
                         .HasColumnName("tipodeentrega");

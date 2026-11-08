@@ -23,7 +23,7 @@ namespace KFRestaurante.Tests.Servicos
             restaurante.AlterarWhatsApp("5531999999999");
             restaurante.Abrir();
 
-            Pedido pedido = new Pedido("Maria", pagamento, troco, entrega, "Rua A, 10", referencia, observacao, restaurante, cardapio);
+            Pedido pedido = new Pedido("Maria", "31999999999", pagamento, troco, entrega, "Rua A, 10", referencia, observacao, restaurante, cardapio);
 
             Marmita marmita = new Marmita(_m);
             marmita.AdicionarOpcao(_arroz);
@@ -52,11 +52,28 @@ namespace KFRestaurante.Tests.Servicos
         {
             string mensagem = MensagemWhatsApp.Montar(Pedido());
 
-            Assert.Contains("Cliente: Maria", Linhas(mensagem));
+            Assert.Contains("Cliente: Maria · (31) 99999-9999", Linhas(mensagem));
             Assert.Contains("1x Feijoada — R$ 25,00", Linhas(mensagem));
             Assert.Contains("2x Marmita M — R$ 40,00", Linhas(mensagem));
             Assert.Contains("   Arroz, Arroz, Feijão Tropeiro", Linhas(mensagem));
             Assert.Contains("*Total: R$ 65,00*", Linhas(mensagem));
+        }
+
+        [Fact]
+        public void Telefone_fixo_sai_formatado_com_oito_digitos()
+        {
+            Restaurante restaurante = new Restaurante();
+            restaurante.AlterarWhatsApp("5531999999999");
+            restaurante.Abrir();
+            CardapioDoDia cardapio = new CardapioDoDia(new DateOnly(2026, 11, 8));
+            cardapio.AdicionarOpcao(_feijoada);
+            cardapio.Publicar();
+            Pedido pedido = new Pedido("João", "3133334444", FormadePagamento.Pix, null, TipoDeEntrega.Retirada, null, null, null, restaurante, cardapio);
+            pedido.AdicionarItem(_feijoada, 1);
+
+            string mensagem = MensagemWhatsApp.Montar(pedido);
+
+            Assert.Contains("Cliente: João · (31) 3333-4444", Linhas(mensagem));
         }
 
         [Fact]

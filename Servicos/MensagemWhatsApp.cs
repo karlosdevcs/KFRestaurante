@@ -20,7 +20,10 @@ namespace KFRestaurante.Servicos
             // *texto* e negrito no WhatsApp
             texto.AppendLine($"*Pedido nº {pedido.Numero}*");
             texto.AppendLine($"{horaLocal.ToString("dd/MM/yyyy", PtBr)} às {horaLocal.ToString("HH:mm", PtBr)}");
-            texto.AppendLine($"Cliente: {pedido.NomeCliente}");
+            // pedidos anteriores ao telefone obrigatorio tem telefone vazio: mostra so o nome
+            texto.AppendLine(pedido.Telefone.Length > 0
+                ? $"Cliente: {pedido.NomeCliente} · {TelefoneFormatado(pedido.Telefone)}"
+                : $"Cliente: {pedido.NomeCliente}");
             texto.AppendLine();
 
             foreach (ItemDoPedido item in pedido.Itens)
@@ -82,6 +85,16 @@ namespace KFRestaurante.Servicos
                 default:
                     return "Pix";
             }
+        }
+
+        // 31999999999 -> (31) 99999-9999 | 3133334444 -> (31) 3333-4444
+        private static string TelefoneFormatado(string digitos)
+        {
+            string ddd = digitos.Substring(0, 2);
+            string numero = digitos.Substring(2);
+            int corte = numero.Length - 4;
+
+            return $"({ddd}) {numero.Substring(0, corte)}-{numero.Substring(corte)}";
         }
 
         private static string Reais(decimal valor)

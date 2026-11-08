@@ -85,6 +85,7 @@ namespace KFRestaurante.Endpoints
                 // 3. o dominio monta o pedido e aplica as regras (DominioException vira 400 no ManipuladorDeExcecoes)
                 Pedido pedido = new Pedido(
                     request.NomeCliente,
+                    request.Telefone,
                     request.FormaDePagamento,
                     request.TrocoPara,
                     request.TipoDeEntrega,
