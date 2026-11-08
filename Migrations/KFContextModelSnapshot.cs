@@ -305,7 +305,7 @@ namespace KFRestaurante.Migrations
                     b.HasOne("KFRestaurante.Dominio.CardapioDoDia", "CardapioDoDia")
                         .WithMany()
                         .HasForeignKey("CardapioDoDiaId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("CardapioDoDia");

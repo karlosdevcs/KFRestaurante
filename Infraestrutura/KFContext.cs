@@ -66,6 +66,12 @@ namespace KFRestaurante.Infraestrutura
                 .Property(p => p.Numero)
                 .HasDefaultValueSql("nextval('pedidos_numero_seq')");
 
+            // apagar um cardapio NAO pode apagar os pedidos daquele dia (sao o historico de vendas)
+            modelBuilder.Entity<Pedido>()
+                .HasOne(p => p.CardapioDoDia)
+                .WithMany()
+                .OnDelete(DeleteBehavior.Restrict);
+
             modelBuilder.Entity<CardapioDoDia>()
                 .HasIndex(c => c.DataPublicacao)
                 .IsUnique();
