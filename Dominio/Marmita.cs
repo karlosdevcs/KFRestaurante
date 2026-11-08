@@ -30,7 +30,7 @@ namespace KFRestaurante.Dominio
 
             if ( _opcoes.Count >= Tamanho.LimitedeComponente)
             {
-                throw new DominioException("O limite de itens excedeu");
+                throw new DominioException($"A {Nome} aceita no máximo {Tamanho.LimitedeComponente} componentes. {opcao.Nome} não coube.");
             }
 
             // porcao dupla conta 2: cada repeticao ja esta na lista _opcoes

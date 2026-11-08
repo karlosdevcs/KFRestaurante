@@ -30,7 +30,7 @@ namespace KFRestaurante.Dominio
 
 				if (jaExiste == true)
 				{
-					throw new DominioException("Esta opcao ja existe");
+					throw new DominioException($"A opção {opcao.Nome} já está no cardápio de {DataPublicacao:dd/MM/yyyy}.");
 
 				} else
 				{
@@ -44,7 +44,7 @@ namespace KFRestaurante.Dominio
 			if (_opcoes.Count == 0)
 				
 			{
-				throw new DominioException("Nao e possivel publicar um cardapio vazio");
+				throw new DominioException($"Não é possível publicar o cardápio de {DataPublicacao:dd/MM/yyyy}: ele não tem nenhuma opção.");
 
 			} else
 			{

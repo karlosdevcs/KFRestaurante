@@ -25,7 +25,7 @@ namespace KFRestaurante.Dominio
        
             if (jaExiste == true)
             {
-                throw new DominioException("Esta opcao ja existe");
+                throw new DominioException($"A opção {opcao.Nome} já está no catálogo.");
             }
             else
             {

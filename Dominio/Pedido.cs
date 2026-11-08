@@ -39,7 +39,7 @@ namespace KFRestaurante.Dominio
                 {
                   if (!CardapioDoDia.Opcoes.Any(o => o.Nome == c.Nome))// dentro do Any, o o é cada opção do cardápio, e o c é o componente da vez
                     {
-                        throw new DominioException("Esse componente nao esta disponivel hoje");
+                        throw new DominioException($"{c.Nome} não está no cardápio de {CardapioDoDia.DataPublicacao:dd/MM/yyyy}.");
                     }
 
                     if (c.Esgotado)
@@ -53,7 +53,7 @@ namespace KFRestaurante.Dominio
             {
                 if (!CardapioDoDia.Opcoes.Any(o => o.Nome == pedivel.Nome))
                 {
-                    throw new DominioException("Esse item nao existe na lista de Opcoes");
+                    throw new DominioException($"{pedivel.Nome} não está no cardápio de {CardapioDoDia.DataPublicacao:dd/MM/yyyy}.");
                 }
 
                 if (pedivel is Opcao opcao && opcao.Esgotado)
@@ -82,11 +82,11 @@ namespace KFRestaurante.Dominio
 
             if (!restaurante.Aberto)
             {
-                throw new DominioException("O restaurante esta fechado");
+                throw new DominioException("O restaurante está fechado e não está recebendo pedidos.");
             }
             if (cardapio.Situacao != SituacaoCardapio.Publicado)
             {
-                throw new DominioException("O cardapio nao esta publicado");
+                throw new DominioException($"O cardápio de {cardapio.DataPublicacao:dd/MM/yyyy} não está aberto para pedidos. Situação atual: {cardapio.Situacao}.");
             }
             if (tipodeentrega == TipoDeEntrega.Entrega && string.IsNullOrWhiteSpace(endereco))
             {
