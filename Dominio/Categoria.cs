@@ -7,12 +7,18 @@ using System.Threading.Tasks;
 
 namespace KFRestaurante.Dominio
 {
+    // os numeros sao o que fica gravado no banco: NUNCA mudar o numero de uma categoria existente.
+    // Carne ocupa o 0 que era do antigo Prato (as opcoes que eram Prato viraram Carne).
     public enum Categoria
     {
-        Prato,
-        Acompanhamento,
-        Bebida,
-        Sobremesa
+        // componentes de marmita
+        Carne = 0,
+        Acompanhamento = 1,
+        Guarnicao = 4,
+        Salada = 5,
 
+        // so vendidos avulsos
+        Bebida = 2,
+        Sobremesa = 3
     }
 }

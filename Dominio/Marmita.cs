@@ -23,6 +23,11 @@ namespace KFRestaurante.Dominio
          
         public void AdicionarOpcao(Opcao opcao)
         {
+            if (opcao.Categoria == Categoria.Bebida || opcao.Categoria == Categoria.Sobremesa)
+            {
+                throw new DominioException($"{opcao.Nome} é {opcao.Categoria} e não pode ser componente de marmita.");
+            }
+
             if ( _opcoes.Count >= Tamanho.LimitedeComponente)
             {
                 throw new DominioException("O limite de itens excedeu");
