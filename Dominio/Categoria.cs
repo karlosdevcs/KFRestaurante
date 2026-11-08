@@ -21,4 +21,13 @@ namespace KFRestaurante.Dominio
         Bebida = 2,
         Sobremesa = 3
     }
+
+    public static class CategoriaExtensions
+    {
+        // uso: opcao.Categoria.EhComponenteDeMarmita()
+        public static bool EhComponenteDeMarmita(this Categoria categoria)
+        {
+            return categoria != Categoria.Bebida && categoria != Categoria.Sobremesa;
+        }
+    }
 }

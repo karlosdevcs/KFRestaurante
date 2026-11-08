@@ -40,6 +40,15 @@ namespace KFRestaurante.Infraestrutura
                 .HasIndex(t => t.Nome)
                 .IsUnique();
 
+            // limites por categoria: tabela propria, mas sempre carregada e salva junto com o tamanho
+            modelBuilder.Entity<TamanhoMarmita>()
+                .OwnsMany(t => t.Limites, limite =>
+                {
+                    limite.ToTable("limitescategoria");
+                    limite.WithOwner().HasForeignKey("TamanhoMarmitaId");
+                    limite.HasKey("TamanhoMarmitaId", "Categoria"); // um limite por categoria em cada tamanho
+                });
+
             modelBuilder.Entity<Pedido>()
                 .HasIndex(p => p.Numero)
                 .IsUnique();

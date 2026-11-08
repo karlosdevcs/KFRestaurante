@@ -43,6 +43,30 @@ namespace KFRestaurante.Endpoints
                 .Produces<TamanhoResponse>(StatusCodes.Status201Created)
                 .ProducesProblem(StatusCodes.Status400BadRequest)
                 .ProducesProblem(StatusCodes.Status409Conflict);
+
+            app.MapPut("/tamanhos/{id}/limites", async (int id, AlterarLimitesRequest request, KFContext contexto) =>
+            {
+                if (request.Limites == null)
+                {
+                    return Results.Problem(detail: "Informe a lista de limites (lista vazia remove todos).", statusCode: StatusCodes.Status400BadRequest);
+                }
+
+                TamanhoMarmita? tamanho = await contexto.TamanhosMarmita.FindAsync(id);
+
+                if (tamanho == null)
+                {
+                    return Results.Problem(detail: $"O tamanho com o id '{id}' não foi encontrado.", statusCode: StatusCodes.Status404NotFound);
+                }
+
+                // as regras (categoria valida, maximo >= 0, sem repeticao) ficam no dominio
+                tamanho.DefinirLimites(request.Limites.Select(limite => new LimiteCategoria(limite.Categoria, limite.Maximo)));
+                await contexto.SaveChangesAsync();
+
+                return Results.Ok(TamanhoResponse.De(tamanho));
+            })
+                .Produces<TamanhoResponse>(StatusCodes.Status200OK)
+                .ProducesProblem(StatusCodes.Status400BadRequest)
+                .ProducesProblem(StatusCodes.Status404NotFound);
         }
     }
 }

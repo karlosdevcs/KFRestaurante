@@ -23,7 +23,7 @@ namespace KFRestaurante.Dominio
          
         public void AdicionarOpcao(Opcao opcao)
         {
-            if (opcao.Categoria == Categoria.Bebida || opcao.Categoria == Categoria.Sobremesa)
+            if (!opcao.Categoria.EhComponenteDeMarmita())
             {
                 throw new DominioException($"{opcao.Nome} é {opcao.Categoria} e não pode ser componente de marmita.");
             }
@@ -31,10 +31,19 @@ namespace KFRestaurante.Dominio
             if ( _opcoes.Count >= Tamanho.LimitedeComponente)
             {
                 throw new DominioException("O limite de itens excedeu");
-            } else
-            {
-                _opcoes.Add(opcao);
             }
+
+            // porcao dupla conta 2: cada repeticao ja esta na lista _opcoes
+            int? limiteDaCategoria = Tamanho.LimiteDe(opcao.Categoria);
+
+            if (limiteDaCategoria != null && _opcoes.Count(o => o.Categoria == opcao.Categoria) >= limiteDaCategoria)
+            {
+                string dica = _opcoes.Contains(opcao) ? " Porção dupla conta como 2." : "";
+
+                throw new DominioException($"A {Nome} aceita no máximo {limiteDaCategoria} de {opcao.Categoria}.{dica}");
+            }
+
+            _opcoes.Add(opcao);
 
        
         }

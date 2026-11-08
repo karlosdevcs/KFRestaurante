@@ -8,11 +8,13 @@ using System.Threading.Tasks;
 
 namespace KFRestaurante.DTOs
 {
-    public record TamanhoResponse(int Id, string Nome, decimal Preco,  int LimitedeComponente) 
+    public record TamanhoResponse(int Id, string Nome, decimal Preco,  int LimitedeComponente, List<LimiteCategoriaResponse> Limites)
     {
         public static TamanhoResponse De(TamanhoMarmita tamanho)
         {
-            TamanhoResponse tamanhoResponse = new TamanhoResponse(tamanho.Id, tamanho.Nome, tamanho.Preco, tamanho.LimitedeComponente);
+            List<LimiteCategoriaResponse> limites = tamanho.Limites.Select(limite => LimiteCategoriaResponse.De(limite)).ToList();
+
+            TamanhoResponse tamanhoResponse = new TamanhoResponse(tamanho.Id, tamanho.Nome, tamanho.Preco, tamanho.LimitedeComponente, limites);
             return tamanhoResponse;
         }
     }

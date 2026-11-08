@@ -311,6 +311,33 @@ namespace KFRestaurante.Migrations
                     b.Navigation("CardapioDoDia");
                 });
 
+            modelBuilder.Entity("KFRestaurante.Dominio.TamanhoMarmita", b =>
+                {
+                    b.OwnsMany("KFRestaurante.Dominio.LimiteCategoria", "Limites", b1 =>
+                        {
+                            b1.Property<int>("TamanhoMarmitaId")
+                                .HasColumnType("integer")
+                                .HasColumnName("tamanhomarmitaid");
+
+                            b1.Property<int>("Categoria")
+                                .HasColumnType("integer")
+                                .HasColumnName("categoria");
+
+                            b1.Property<int>("Maximo")
+                                .HasColumnType("integer")
+                                .HasColumnName("maximo");
+
+                            b1.HasKey("TamanhoMarmitaId", "Categoria");
+
+                            b1.ToTable("limitescategoria", (string)null);
+
+                            b1.WithOwner()
+                                .HasForeignKey("TamanhoMarmitaId");
+                        });
+
+                    b.Navigation("Limites");
+                });
+
             modelBuilder.Entity("MarmitaOpcao", b =>
                 {
                     b.HasOne("KFRestaurante.Dominio.Marmita", null)
