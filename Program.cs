@@ -257,6 +257,130 @@ namespace KFRestaurante
                 return Results.Ok(RestauranteResponse.De(restaurante));
             });
 
+            app.MapPost("/pedidos", (CriarPedidoRequest request, KFContext contexto) =>
+            {
+                // 1. formato do request (sem ir ao banco)
+                if (request.Itens == null || request.Itens.Count == 0)
+                {
+                    return Results.BadRequest("O pedido precisa ter ao menos um item.");
+                }
+
+                for (int i = 0; i < request.Itens.Count; i++)
+                {
+                    CriarItemDoPedidoRequest item = request.Itens[i];
+                    bool ehAvulso = item.OpcaoId != null;
+                    bool ehMarmita = item.TamanhoId != null;
+
+                    if (ehAvulso == ehMarmita)
+                    {
+                        return Results.BadRequest($"Item {i + 1}: informe OpcaoId (item avulso) ou TamanhoId com ComponentesIds (marmita), nunca os dois nem nenhum.");
+                    }
+
+                    if (ehAvulso && item.ComponentesIds != null && item.ComponentesIds.Count > 0)
+                    {
+                        return Results.BadRequest($"Item {i + 1}: ComponentesIds só vale para marmita.");
+                    }
+                }
+
+                // 2. tudo que ja existe vem do banco
+                CardapioDoDia? cardapio = contexto.CardapiosDoDia
+                    .Include(c => c.Opcoes)
+                    .FirstOrDefault(c => c.Id == request.CardapioId);
+
+                if (cardapio == null)
+                {
+                    return Results.BadRequest($"O cardápio com o id '{request.CardapioId}' não foi encontrado.");
+                }
+
+                List<int> idsOpcoes = request.Itens
+                    .Where(item => item.OpcaoId != null)
+                    .Select(item => item.OpcaoId!.Value)
+                    .Concat(request.Itens.SelectMany(item => item.ComponentesIds ?? new List<int>()))
+                    .Distinct()
+                    .ToList();
+
+                Dictionary<int, Opcao> opcoes = contexto.Opcoes
+                    .Where(opcao => idsOpcoes.Contains(opcao.Id))
+                    .ToDictionary(opcao => opcao.Id);
+
+                List<int> idsOpcoesInvalidos = idsOpcoes.Where(id => !opcoes.ContainsKey(id)).ToList();
+
+                if (idsOpcoesInvalidos.Count > 0)
+                {
+                    return Results.BadRequest($"Ids de opções não encontrados: {string.Join(", ", idsOpcoesInvalidos)}.");
+                }
+
+                List<int> idsTamanhos = request.Itens
+                    .Where(item => item.TamanhoId != null)
+                    .Select(item => item.TamanhoId!.Value)
+                    .Distinct()
+                    .ToList();
+
+                Dictionary<int, TamanhoMarmita> tamanhos = contexto.TamanhosMarmita
+                    .Where(tamanho => idsTamanhos.Contains(tamanho.Id))
+                    .ToDictionary(tamanho => tamanho.Id);
+
+                List<int> idsTamanhosInvalidos = idsTamanhos.Where(id => !tamanhos.ContainsKey(id)).ToList();
+
+                if (idsTamanhosInvalidos.Count > 0)
+                {
+                    return Results.BadRequest($"Ids de tamanhos não encontrados: {string.Join(", ", idsTamanhosInvalidos)}.");
+                }
+
+                // sem linha no banco = restaurante fechado, e o dominio recusa
+                Restaurante restaurante = contexto.Restaurantes.OrderBy(r => r.Id).FirstOrDefault() ?? new Restaurante();
+
+                // 3. o dominio monta o pedido e aplica as regras
+                Pedido pedido;
+
+                try
+                {
+                    pedido = new Pedido(request.FormaDePagamento, request.TipoDeEntrega, request.Endereco, restaurante, cardapio);
+
+                    foreach (CriarItemDoPedidoRequest item in request.Itens)
+                    {
+                        if (item.OpcaoId != null)
+                        {
+                            pedido.AdicionarItem(opcoes[item.OpcaoId.Value], item.Quantidade);
+                            continue;
+                        }
+
+                        Marmita marmita = new Marmita(tamanhos[item.TamanhoId!.Value]);
+
+                        foreach (int componenteId in item.ComponentesIds ?? new List<int>())
+                        {
+                            marmita.AdicionarOpcao(opcoes[componenteId]);
+                        }
+
+                        pedido.AdicionarItem(marmita, item.Quantidade);
+                    }
+                }
+                catch (InvalidOperationException ex)
+                {
+                    return Results.BadRequest(ex.Message);
+                }
+
+                contexto.Add(pedido);
+                contexto.SaveChanges(); // o banco gera o Numero pela sequence e o EF le de volta
+
+                return Results.Created($"/pedidos/{pedido.Id}", PedidoResponse.De(pedido));
+            });
+
+            app.MapGet("/pedidos/{id}", (int id, KFContext contexto) =>
+            {
+                Pedido? pedido = contexto.Pedidos
+                    .Include(p => p.Itens)
+                    .Include(p => p.CardapioDoDia)
+                    .FirstOrDefault(p => p.Id == id);
+
+                if (pedido == null)
+                {
+                    return Results.NotFound($"O pedido com o id '{id}' não foi encontrado.");
+                }
+
+                return Results.Ok(PedidoResponse.De(pedido));
+            });
+
 
                 app.UseSwagger();
                 app.UseSwaggerUI();

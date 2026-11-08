@@ -44,6 +44,13 @@ namespace KFRestaurante.Infraestrutura
                 .HasIndex(p => p.Numero)
                 .IsUnique();
 
+            // numero do pedido gerado pelo banco: sequencial, sem reiniciar, sem colisao entre pedidos simultaneos
+            modelBuilder.HasSequence<int>("pedidos_numero_seq");
+
+            modelBuilder.Entity<Pedido>()
+                .Property(p => p.Numero)
+                .HasDefaultValueSql("nextval('pedidos_numero_seq')");
+
             modelBuilder.Entity<CardapioDoDia>()
                 .HasIndex(c => c.DataPublicacao)
                 .IsUnique();

@@ -22,6 +22,8 @@ namespace KFRestaurante.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.HasSequence<int>("pedidos_numero_seq");
+
             modelBuilder.Entity("CardapioDoDiaOpcao", b =>
                 {
                     b.Property<int>("CardapioDoDiaId")
@@ -72,6 +74,10 @@ namespace KFRestaurante.Migrations
                         .HasColumnName("id");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Componentes")
+                        .HasColumnType("text")
+                        .HasColumnName("componentes");
 
                     b.Property<string>("Nome")
                         .IsRequired()
@@ -164,6 +170,10 @@ namespace KFRestaurante.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("cardapiododiaid");
 
+                    b.Property<string>("Endereco")
+                        .HasColumnType("text")
+                        .HasColumnName("endereco");
+
                     b.Property<int>("FormaDePagamento")
                         .HasColumnType("integer")
                         .HasColumnName("formadepagamento");
@@ -173,8 +183,10 @@ namespace KFRestaurante.Migrations
                         .HasColumnName("horapedido");
 
                     b.Property<int>("Numero")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("integer")
-                        .HasColumnName("numero");
+                        .HasColumnName("numero")
+                        .HasDefaultValueSql("nextval('pedidos_numero_seq')");
 
                     b.Property<int>("TipoDeEntrega")
                         .HasColumnType("integer")

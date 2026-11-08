@@ -17,6 +17,8 @@ namespace KFRestaurante.Dominio
         
         public TipoDeEntrega TipoDeEntrega { get; set; }
 
+        public string? Endereco { get; private set; }
+
         public CardapioDoDia CardapioDoDia { get; private set; } = null!;
 
         private List<ItemDoPedido> _itens = new List<ItemDoPedido>();
@@ -33,7 +35,12 @@ namespace KFRestaurante.Dominio
                     {
                         throw new InvalidOperationException("Esse componente nao esta disponivel hoje");
                     }
-                   
+
+                    if (c.Esgotado)
+                    {
+                        throw new InvalidOperationException($"A opção {c.Nome} está esgotada.");
+                    }
+
                 }
 
             } else
@@ -41,6 +48,11 @@ namespace KFRestaurante.Dominio
                 if (!CardapioDoDia.Opcoes.Any(o => o.Nome == pedivel.Nome))
                 {
                     throw new InvalidOperationException("Esse item nao existe na lista de Opcoes");
+                }
+
+                if (pedivel is Opcao opcao && opcao.Esgotado)
+                {
+                    throw new InvalidOperationException($"A opção {opcao.Nome} está esgotada.");
                 }
             }
 
@@ -51,24 +63,29 @@ namespace KFRestaurante.Dominio
 
         }
 
-        public Pedido(int numero, FormadePagamento formadepagamento, TipoDeEntrega tipodeentrega, Restaurante restaurante, CardapioDoDia cardapio)
-        
+        // Numero nao vem de fora: o banco gera pela sequence pedidos_numero_seq no INSERT (ver KFContext)
+        public Pedido(FormadePagamento formadepagamento, TipoDeEntrega tipodeentrega, string? endereco, Restaurante restaurante, CardapioDoDia cardapio)
+
         {
-            
+
 
             if (!restaurante.Aberto)
             {
                 throw new InvalidOperationException("O restaurante esta fechado");
-            } 
+            }
             if (cardapio.Situacao != SituacaoCardapio.Publicado)
             {
                 throw new InvalidOperationException("O cardapio nao esta publicado");
             }
+            if (tipodeentrega == TipoDeEntrega.Entrega && string.IsNullOrWhiteSpace(endereco))
+            {
+                throw new InvalidOperationException("O endereço é obrigatório para pedidos com entrega.");
+            }
 
-            this.Numero = numero;
-            this.HoraPedido = DateTime.Now;
+            this.HoraPedido = DateTime.UtcNow; // UTC: o Postgres (timestamptz) nao aceita hora local
             this.FormaDePagamento = formadepagamento;
             this.TipoDeEntrega = tipodeentrega;
+            this.Endereco = tipodeentrega == TipoDeEntrega.Entrega ? endereco!.Trim() : null; // retirada nao guarda endereco
             this.CardapioDoDia = cardapio;
            
         }
