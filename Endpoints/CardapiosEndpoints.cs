@@ -1,6 +1,7 @@
 ﻿using KFRestaurante.Dominio;
 using KFRestaurante.DTOs;
 using KFRestaurante.Infraestrutura;
+using KFRestaurante.Servicos;
 using Microsoft.EntityFrameworkCore;
 
 namespace KFRestaurante.Endpoints
@@ -22,7 +23,7 @@ namespace KFRestaurante.Endpoints
                     return Results.Problem(detail: $"Ids enviados mais de uma vez: {string.Join(", ", idsRepetidos)}.", statusCode: StatusCodes.Status400BadRequest);
                 }
 
-                DateOnly hoje = DateOnly.FromDateTime(DateTime.Now);
+                DateOnly hoje = HorarioBrasilia.Hoje(); // nao DateTime.Now: o servidor pode estar em UTC
 
                 if (await contexto.CardapiosDoDia.AnyAsync(cardapio => cardapio.DataPublicacao == hoje))
                 {
@@ -53,6 +54,28 @@ namespace KFRestaurante.Endpoints
                 .Produces<CardapioResponse>(StatusCodes.Status201Created)
                 .ProducesProblem(StatusCodes.Status400BadRequest)
                 .ProducesProblem(StatusCodes.Status409Conflict);
+
+            // a tela do cliente comeca aqui: ele nao sabe o id, so que quer o cardapio de hoje.
+            // Rota literal "hoje" tem prioridade sobre "{id}" no roteamento do ASP.NET
+            app.MapGet("/cardapios/hoje", async (KFContext contexto) =>
+            {
+                DateOnly hoje = HorarioBrasilia.Hoje();
+
+                CardapioDoDia? cardapio = await contexto.CardapiosDoDia
+                    .Include(cardapio => cardapio.Opcoes)
+                    .FirstOrDefaultAsync(cardapio => cardapio.DataPublicacao == hoje);
+
+                // rascunho e trabalho do dono em andamento: para o cliente, ainda nao existe
+                if (cardapio == null || cardapio.Situacao == SituacaoCardapio.Rascunho)
+                {
+                    return Results.Problem(detail: $"O cardápio de {hoje:dd/MM/yyyy} ainda não foi publicado.", statusCode: StatusCodes.Status404NotFound);
+                }
+
+                // publicado ou fechado: a tela usa a situacao para mostrar "encerrado por hoje"
+                return Results.Ok(CardapioResponse.De(cardapio));
+            })
+                .Produces<CardapioResponse>(StatusCodes.Status200OK)
+                .ProducesProblem(StatusCodes.Status404NotFound);
 
             app.MapGet("/cardapios/{id}", async (int id, KFContext contexto) =>
             {

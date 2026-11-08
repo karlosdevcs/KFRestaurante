@@ -11,12 +11,9 @@ namespace KFRestaurante.Servicos
     {
         private static readonly CultureInfo PtBr = CultureInfo.GetCultureInfo("pt-BR");
 
-        // "America/Sao_Paulo" existe no Windows (.NET 6+) e no Linux
-        private static readonly TimeZoneInfo Brasilia = TimeZoneInfo.FindSystemTimeZoneById("America/Sao_Paulo");
-
         public static string Montar(Pedido pedido)
         {
-            DateTime horaLocal = TimeZoneInfo.ConvertTimeFromUtc(DateTime.SpecifyKind(pedido.HoraPedido, DateTimeKind.Utc), Brasilia);
+            DateTime horaLocal = HorarioBrasilia.DeUtc(pedido.HoraPedido);
 
             StringBuilder texto = new StringBuilder();
 
