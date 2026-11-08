@@ -232,6 +232,10 @@ namespace KFRestaurante.Migrations
                         .HasColumnType("boolean")
                         .HasColumnName("aberto");
 
+                    b.Property<string>("WhatsApp")
+                        .HasColumnType("text")
+                        .HasColumnName("whatsapp");
+
                     b.HasKey("Id");
 
                     b.ToTable("restaurantes");

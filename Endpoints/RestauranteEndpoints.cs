@@ -32,12 +32,13 @@ namespace KFRestaurante.Endpoints
                     contexto.Add(restaurante);
                 }
 
-                restaurante.Abrir();
+                restaurante.Abrir(); // sem WhatsApp cadastrado: DominioException -> 400
                 await contexto.SaveChangesAsync();
 
                 return Results.Ok(RestauranteResponse.De(restaurante));
             })
-                .Produces<RestauranteResponse>(StatusCodes.Status200OK);
+                .Produces<RestauranteResponse>(StatusCodes.Status200OK)
+                .ProducesProblem(StatusCodes.Status400BadRequest);
 
             app.MapPost("/restaurante/fechar", async (KFContext contexto) =>
             {
@@ -55,6 +56,24 @@ namespace KFRestaurante.Endpoints
                 return Results.Ok(RestauranteResponse.De(restaurante));
             })
                 .Produces<RestauranteResponse>(StatusCodes.Status200OK);
+
+            app.MapPut("/restaurante/whatsapp", async (AlterarWhatsAppRequest request, KFContext contexto) =>
+            {
+                Restaurante? restaurante = await contexto.Restaurantes.OrderBy(r => r.Id).FirstOrDefaultAsync();
+
+                if (restaurante == null)
+                {
+                    restaurante = new Restaurante();
+                    contexto.Add(restaurante);
+                }
+
+                restaurante.AlterarWhatsApp(request.WhatsApp); // formato invalido: DominioException -> 400
+                await contexto.SaveChangesAsync();
+
+                return Results.Ok(RestauranteResponse.De(restaurante));
+            })
+                .Produces<RestauranteResponse>(StatusCodes.Status200OK)
+                .ProducesProblem(StatusCodes.Status400BadRequest);
         }
     }
 }

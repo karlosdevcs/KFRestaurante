@@ -23,6 +23,7 @@ namespace KFRestaurante.Tests.Dominio
         private static Restaurante RestauranteAberto()
         {
             Restaurante restaurante = new Restaurante();
+            restaurante.AlterarWhatsApp("5531999999999");
             restaurante.Abrir();
             return restaurante;
         }
