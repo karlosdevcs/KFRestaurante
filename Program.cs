@@ -35,7 +35,23 @@ namespace KFRestaurante
             builder.Services.AddProblemDetails();
             builder.Services.AddExceptionHandler<ManipuladorDeExcecoes>();
 
+            // o front roda em outro endereco (outra porta ou dominio): sem CORS o navegador bloqueia as chamadas.
+            // Os enderecos ficam no appsettings para incluir o dominio do site publicado sem recompilar
+            string[] origensPermitidas = builder.Configuration.GetSection("Cors:OrigensPermitidas").Get<string[]>() ?? Array.Empty<string>();
+
+            builder.Services.AddCors(options =>
+            {
+                options.AddDefaultPolicy(policy => policy
+                    .WithOrigins(origensPermitidas)
+                    .AllowAnyHeader()
+                    .AllowAnyMethod());
+            });
+
             var app = builder.Build();
+
+            // antes do tratamento de erros: assim as respostas de erro (400, 404...) tambem levam os cabecalhos de CORS
+            // e o front consegue ler a mensagem do ProblemDetails
+            app.UseCors();
 
             app.UseExceptionHandler(); // toda excecao nao tratada passa pelo ManipuladorDeExcecoes
 
