@@ -22,6 +22,11 @@ namespace KFRestaurante.Dominio
             this.Preco = preco;
         }
 
+        public void AlterarEsgotado(bool esgotado)
+        {
+            this.Esgotado = esgotado; // marcar o que ja esta marcado nao da erro (idempotente)
+        }
+
         private Opcao() { }
 
     }

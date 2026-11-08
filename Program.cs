@@ -78,6 +78,21 @@ namespace KFRestaurante
 
             });
 
+            app.MapPatch("/opcoes/{id}/esgotado", (int id, AlterarEsgotadoRequest request, KFContext contexto) =>
+            {
+                Opcao? opcao = contexto.Opcoes.Find(id);
+
+                if (opcao == null)
+                {
+                    return Results.NotFound($"A opção com o id '{id}' não foi encontrada.");
+                }
+
+                opcao.AlterarEsgotado(request.Esgotado);
+                contexto.SaveChanges();
+
+                return Results.Ok(OpcaoResponse.De(opcao));
+            });
+
             app.MapGet("/tamanhos", (KFContext contexto) =>
             {
                 return contexto.TamanhosMarmita.Select(tamanho => TamanhoResponse.De(tamanho));
