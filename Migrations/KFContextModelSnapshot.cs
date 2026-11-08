@@ -58,6 +58,9 @@ namespace KFRestaurante.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("DataPublicacao")
+                        .IsUnique();
+
                     b.ToTable("cardapiosdodia");
                 });
 

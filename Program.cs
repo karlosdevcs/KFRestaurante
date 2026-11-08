@@ -105,8 +105,113 @@ namespace KFRestaurante
                 contexto.Add(tamanho1);
                 contexto.SaveChanges();
                 return Results.Created($"/tamanhos/{tamanho1.Id}", TamanhoResponse.De(tamanho1));
-            }); 
-           
+            });
+
+            app.MapPost("/cardapios", (CriarCardapioRequest request, KFContext contexto) =>
+            {
+                List<int> idsRepetidos = request.OpcoesIds
+                    .GroupBy(id => id)
+                    .Where(grupo => grupo.Count() > 1)
+                    .Select(grupo => grupo.Key)
+                    .ToList();
+
+                if (idsRepetidos.Count > 0)
+                {
+                    return Results.BadRequest($"Ids enviados mais de uma vez: {string.Join(", ", idsRepetidos)}.");
+                }
+
+                DateOnly hoje = DateOnly.FromDateTime(DateTime.Now);
+
+                if (contexto.CardapiosDoDia.Any(cardapio => cardapio.DataPublicacao == hoje))
+                {
+                    return Results.Conflict($"Já existe um cardápio para a data {hoje:dd/MM/yyyy}.");
+                }
+
+                List<Opcao> opcoes = contexto.Opcoes.Where(opcao => request.OpcoesIds.Contains(opcao.Id)).ToList();
+
+                List<int> idsInvalidos = request.OpcoesIds.Except(opcoes.Select(opcao => opcao.Id)).ToList();
+
+                if (idsInvalidos.Count > 0)
+                {
+                    return Results.BadRequest($"Ids de opções não encontrados: {string.Join(", ", idsInvalidos)}.");
+                }
+
+                CardapioDoDia cardapio1 = new CardapioDoDia(hoje);
+
+                foreach (Opcao opcao in opcoes)
+                {
+                    cardapio1.AdicionarOpcao(opcao);
+                }
+
+                contexto.Add(cardapio1);
+                contexto.SaveChanges();
+
+                return Results.Created($"/cardapios/{cardapio1.Id}", CardapioResponse.De(cardapio1));
+            });
+
+            app.MapGet("/cardapios/{id}", (int id, KFContext contexto) =>
+            {
+                CardapioDoDia? cardapio = contexto.CardapiosDoDia
+                    .Include(cardapio => cardapio.Opcoes)
+                    .FirstOrDefault(cardapio => cardapio.Id == id);
+
+                if (cardapio == null)
+                {
+                    return Results.NotFound($"O cardápio com o id '{id}' não foi encontrado.");
+                }
+
+                return Results.Ok(CardapioResponse.De(cardapio));
+            });
+
+            app.MapPost("/cardapios/{id}/publicar", (int id, KFContext contexto) =>
+            {
+                CardapioDoDia? cardapio = contexto.CardapiosDoDia
+                    .Include(cardapio => cardapio.Opcoes)
+                    .FirstOrDefault(cardapio => cardapio.Id == id);
+
+                if (cardapio == null)
+                {
+                    return Results.NotFound($"O cardápio com o id '{id}' não foi encontrado.");
+                }
+
+                try
+                {
+                    cardapio.Publicar();
+                }
+                catch (InvalidOperationException ex)
+                {
+                    return Results.BadRequest(ex.Message);
+                }
+
+                contexto.SaveChanges();
+
+                return Results.Ok(CardapioResponse.De(cardapio));
+            });
+
+            app.MapPost("/cardapios/{id}/fechar", (int id, KFContext contexto) =>
+            {
+                CardapioDoDia? cardapio = contexto.CardapiosDoDia
+                    .Include(cardapio => cardapio.Opcoes)
+                    .FirstOrDefault(cardapio => cardapio.Id == id);
+
+                if (cardapio == null)
+                {
+                    return Results.NotFound($"O cardápio com o id '{id}' não foi encontrado.");
+                }
+
+                try
+                {
+                    cardapio.Fechar();
+                }
+                catch (InvalidOperationException ex)
+                {
+                    return Results.BadRequest(ex.Message);
+                }
+
+                contexto.SaveChanges();
+
+                return Results.Ok(CardapioResponse.De(cardapio));
+            });
 
 
                 app.UseSwagger();

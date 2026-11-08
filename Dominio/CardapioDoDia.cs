@@ -48,9 +48,19 @@ namespace KFRestaurante.Dominio
 
 			} else
 			{
-				this.Situacao = SituacaoCardapio.Publicado; 
+				this.Situacao = SituacaoCardapio.Publicado;
 			}
 
+		}
+
+		public void Fechar()
+		{
+			if (this.Situacao == SituacaoCardapio.Rascunho)
+			{
+				throw new InvalidOperationException("Não é possível fechar um cardápio em rascunho.");
+			}
+
+			this.Situacao = SituacaoCardapio.Fechado; // ja fechado: continua fechado, sem erro (idempotente, igual ao Publicar)
 		}
 
         private CardapioDoDia() { }

@@ -9,7 +9,8 @@ namespace KFRestaurante.Dominio
     public enum SituacaoCardapio
     {
         Rascunho,
-        Publicado
+        Publicado,
+        Fechado
     }
 
 }

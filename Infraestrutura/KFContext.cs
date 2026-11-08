@@ -45,6 +45,10 @@ namespace KFRestaurante.Infraestrutura
                 .IsUnique();
 
             modelBuilder.Entity<CardapioDoDia>()
+                .HasIndex(c => c.DataPublicacao)
+                .IsUnique();
+
+            modelBuilder.Entity<CardapioDoDia>()
                 .HasMany(c => c.Opcoes)
                 .WithMany();
 
