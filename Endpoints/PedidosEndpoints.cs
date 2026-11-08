@@ -117,7 +117,8 @@ namespace KFRestaurante.Endpoints
                 contexto.Add(pedido);
                 await contexto.SaveChangesAsync(); // o banco gera o Numero pela sequence e o EF le de volta
 
-                return Results.Created($"/pedidos/{pedido.Id}", PedidoResponse.De(pedido));
+                // a resposta traz a mensagem pronta e o link wa.me: o app do cliente so precisa abrir o link
+                return Results.Created($"/pedidos/{pedido.Id}", PedidoResponse.De(pedido, restaurante.WhatsApp));
             })
                 .Produces<PedidoResponse>(StatusCodes.Status201Created)
                 .ProducesProblem(StatusCodes.Status400BadRequest);
@@ -134,7 +135,10 @@ namespace KFRestaurante.Endpoints
                     return Results.Problem(detail: $"O pedido com o id '{id}' não foi encontrado.", statusCode: StatusCodes.Status404NotFound);
                 }
 
-                return Results.Ok(PedidoResponse.De(pedido));
+                // usa o numero atual da loja: permite reenviar o pedido se o cliente fechou o WhatsApp sem mandar
+                string? whatsAppDaLoja = await contexto.Restaurantes.OrderBy(r => r.Id).Select(r => r.WhatsApp).FirstOrDefaultAsync();
+
+                return Results.Ok(PedidoResponse.De(pedido, whatsAppDaLoja));
             })
                 .Produces<PedidoResponse>(StatusCodes.Status200OK)
                 .ProducesProblem(StatusCodes.Status404NotFound);
