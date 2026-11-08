@@ -229,6 +229,9 @@ namespace KFRestaurante.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("Nome")
+                        .IsUnique();
+
                     b.ToTable("tamanhosmarmita");
                 });
 

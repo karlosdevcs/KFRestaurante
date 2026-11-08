@@ -36,6 +36,10 @@ namespace KFRestaurante.Infraestrutura
                 .HasIndex(o => o.Nome)
                 .IsUnique();
 
+            modelBuilder.Entity<TamanhoMarmita>()
+                .HasIndex(t => t.Nome)
+                .IsUnique();
+
             modelBuilder.Entity<Pedido>()
                 .HasIndex(p => p.Numero)
                 .IsUnique();
