@@ -34,6 +34,8 @@ Projeto de estudo e portfólio: o foco está menos na quantidade de funcionalida
 
    Swagger: http://localhost:5000/swagger
 
+   Se o front rodar em outro endereço, inclua-o em `Cors:OrigensPermitidas` no `appsettings.json`. Já vêm liberadas as portas mais comuns de desenvolvimento (5173, 3000 e 5500).
+
 4. **Testes:**
 
    ```bash
@@ -60,7 +62,8 @@ Projeto de estudo e portfólio: o foco está menos na quantidade de funcionalida
 | **Tamanhos** | `GET /tamanhos` · `GET /tamanhos/{id}` | Lista / busca, com os limites por categoria |
 | | `POST /tamanhos` · `PUT /tamanhos/{id}` | Cadastra / edita nome, preço e limite total de componentes |
 | | `PUT /tamanhos/{id}/limites` | Define os limites por categoria (ex.: até 2 carnes) |
-| **Cardápio do dia** | `POST /cardapios` | Cria o cardápio de hoje a partir de ids de opções |
+| **Cardápio do dia** | `GET /cardapios/hoje` | **Ponto de entrada do cliente:** o cardápio de hoje, se já publicado |
+| | `POST /cardapios` | Cria o cardápio de hoje a partir de ids de opções |
 | | `GET /cardapios/{id}` | Busca |
 | | `POST /cardapios/{id}/publicar` · `POST /cardapios/{id}/fechar` | Abre / encerra as vendas (publicar de novo reabre) |
 | **Restaurante** | `GET /restaurante` · `POST /restaurante/abrir` · `POST /restaurante/fechar` | Estado global: fechado bloqueia pedidos |
@@ -176,7 +179,8 @@ As chaves estrangeiras usam `Restrict` onde apagar levaria junto dados que impor
 
 ### Detalhes que evitam bugs silenciosos
 
-- **Hora em UTC:** o pedido grava `DateTime.UtcNow`. O PostgreSQL (`timestamptz`) não aceita hora local, e a conversão para o fuso do Brasil fica para quem exibe.
+- **"Hoje" é o hoje de Brasília:** o servidor pode estar em qualquer fuso (em nuvem, quase sempre UTC). Com `DateTime.Now`, depois das 21h o servidor já estaria no dia seguinte, e o cliente não acharia o cardápio. Toda data de negócio passa por `HorarioBrasilia`.
+- **Hora em UTC no banco:** o pedido grava `DateTime.UtcNow`. O PostgreSQL (`timestamptz`) não aceita hora local, e a conversão para Brasília fica para quem exibe.
 - **Enums com número fixo:** as categorias têm valores explícitos (`Carne = 0`, `Acompanhamento = 1`...). É o número que vai para o banco, e renumerar mudaria o significado dos dados já gravados.
 - **Idempotência:** publicar um cardápio já publicado, fechar o que já está fechado ou abrir o restaurante já aberto não dá erro. Se a rede falhar e o app reenviar, o dono não vê "falhou" sobre algo que funcionou.
 - **Migrations revisadas à mão:** cada migration foi lida antes de aplicar. Numa delas, o `Down` gerado pelo EF apagava a sequence antes do default que dependia dela, e o rollback falharia. Em outras, foram acrescentados passos de dados (por exemplo, converter preço `0` em "sem preço" e voltar no rollback).
@@ -186,6 +190,12 @@ As chaves estrangeiras usam `Restrict` onde apagar levaria junto dados que impor
 Requests e responses são `record` posicionais em `DTOs/`. A conversão é explícita, por um método estático `De` no próprio response (`OpcaoResponse.De(opcao)`). É fácil de ler, sem mágica e sem expor a entidade na API.
 
 ---
+
+## Limitações conhecidas
+
+- **A área da loja não tem autenticação.** Os endpoints do dono (cadastrar opções, publicar cardápio, abrir o restaurante, alterar o WhatsApp) estão abertos, como os do cliente. É uma escolha consciente para o escopo de portfólio. Antes de uso real, esses endpoints precisam de login, e o primeiro passo seria separá-los num grupo de rotas protegido.
+- **O sistema não confirma o envio pelo WhatsApp.** O link abre a conversa com a mensagem pronta, mas quem aperta "enviar" é o cliente. Por isso o relatório conta pedidos *gerados*.
+- **Não há endpoints de exclusão.** Opções, tamanhos e cardápios só são criados e editados. As chaves estrangeiras já estão preparadas (`Restrict`) para quando a exclusão existir.
 
 ## Estrutura
 
@@ -202,4 +212,4 @@ Program.cs          só configuração e registro das rotas
 
 ## Testes
 
-89 testes de unidade cobrem o domínio e a mensagem do WhatsApp: o caminho feliz e cada regra que recusa (restaurante fechado, cardápio não publicado, opção esgotada, limite de componentes, porção dupla, preço congelado, troco menor que o total, entre outras), além do conteúdo exato da mensagem que a loja recebe. Eles não usam banco e rodam em menos de um segundo.
+91 testes de unidade cobrem o domínio e a mensagem do WhatsApp: o caminho feliz e cada regra que recusa (restaurante fechado, cardápio não publicado, opção esgotada, limite de componentes, porção dupla, preço congelado, troco menor que o total, entre outras), além do conteúdo exato da mensagem que a loja recebe. Eles não usam banco e rodam em menos de um segundo.
