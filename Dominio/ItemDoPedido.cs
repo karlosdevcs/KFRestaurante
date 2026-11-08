@@ -10,7 +10,7 @@ namespace KFRestaurante.Dominio
     public class ItemDoPedido
     {
 
-        public int Id { get; set; }
+        public int Id { get; private set; }
 
         //public IPedivel Pedivel { get; private set; } o ItemDoPedido guardava uma referência viva a algo que muda, quando o correto é guardar uma foto do momento da compra.
 

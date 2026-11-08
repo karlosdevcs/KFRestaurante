@@ -10,12 +10,12 @@ namespace KFRestaurante.Dominio
     public class Pedido 
 
     {
-        public int Id { get; set; }
-        public int Numero { get; set; }
-        public DateTime HoraPedido { get; set; }
-        public FormadePagamento FormaDePagamento { get; set; }
+        public int Id { get; private set; }
+        public int Numero { get; private set; }
+        public DateTime HoraPedido { get; private set; }
+        public FormadePagamento FormaDePagamento { get; private set; }
         
-        public TipoDeEntrega TipoDeEntrega { get; set; }
+        public TipoDeEntrega TipoDeEntrega { get; private set; }
 
         public string? Endereco { get; private set; }
 

@@ -10,9 +10,9 @@ namespace KFRestaurante.Dominio
 
 	public class CardapioDoDia
 	{
-        public int Id { get; set; }
-        public DateOnly DataPublicacao { get; set; }
-		public SituacaoCardapio Situacao { get; set; }
+        public int Id { get; private set; }
+        public DateOnly DataPublicacao { get; private set; }
+		public SituacaoCardapio Situacao { get; private set; }
 
 		private List<Opcao> _opcoes = new List<Opcao>();
 		public IEnumerable<Opcao> Opcoes => _opcoes;

@@ -8,7 +8,7 @@ namespace KFRestaurante.Dominio
 {
     public class Marmita: IPedivel
     {
-        public int Id { get; set; }
+        public int Id { get; private set; }
 
         public TamanhoMarmita Tamanho { get; private set; } = null!;
 
