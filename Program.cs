@@ -40,9 +40,9 @@ namespace KFRestaurante
 
 
 
-            app.MapGet("/opcoes", (KFContext contexto) => {
+            app.MapGet("/opcoes", async (KFContext contexto) => {
 
-                return contexto.Opcoes.Select(opcao => OpcaoResponse.De(opcao));
+                return await contexto.Opcoes.Select(opcao => OpcaoResponse.De(opcao)).ToListAsync();
 
 
             });
@@ -50,9 +50,9 @@ namespace KFRestaurante
 
 
 
-            app.MapPost("/opcoes", (CriarOpcaoRequest request, KFContext contexto) =>
+            app.MapPost("/opcoes", async (CriarOpcaoRequest request, KFContext contexto) =>
             {
-                if (contexto.Opcoes.Any(opcao => opcao.Nome == request.Nome))
+                if (await contexto.Opcoes.AnyAsync(opcao => opcao.Nome == request.Nome))
                 {
                     return Results.Problem(detail: $"A opção com o nome '{request.Nome}' já existe.", statusCode: StatusCodes.Status409Conflict);
                 }
@@ -61,17 +61,17 @@ namespace KFRestaurante
 
                 contexto.Add(opcao1);
 
-                contexto.SaveChanges(); //--save changes nao manda so INSERT, ele le de volta o id gerado pelo pg e escreve na inst. do change tracker. 
+                await contexto.SaveChangesAsync(); //--save changes nao manda so INSERT, ele le de volta o id gerado pelo pg e escreve na inst. do change tracker. 
 
 
                 return Results.Created($"/opcoes/{opcao1.Id}", OpcaoResponse.De(opcao1));
 
             });
 
-            app.MapGet("/opcoes/{id}", (int id, KFContext contexto) =>
+            app.MapGet("/opcoes/{id}", async (int id, KFContext contexto) =>
             {
 
-                Opcao? opcao = contexto.Opcoes.Find(id);
+                Opcao? opcao = await contexto.Opcoes.FindAsync(id);
 
                 if (opcao == null)
                 {
@@ -83,9 +83,9 @@ namespace KFRestaurante
 
             });
 
-            app.MapPatch("/opcoes/{id}/esgotado", (int id, AlterarEsgotadoRequest request, KFContext contexto) =>
+            app.MapPatch("/opcoes/{id}/esgotado", async (int id, AlterarEsgotadoRequest request, KFContext contexto) =>
             {
-                Opcao? opcao = contexto.Opcoes.Find(id);
+                Opcao? opcao = await contexto.Opcoes.FindAsync(id);
 
                 if (opcao == null)
                 {
@@ -93,19 +93,19 @@ namespace KFRestaurante
                 }
 
                 opcao.AlterarEsgotado(request.Esgotado);
-                contexto.SaveChanges();
+                await contexto.SaveChangesAsync();
 
                 return Results.Ok(OpcaoResponse.De(opcao));
             });
 
-            app.MapGet("/tamanhos", (KFContext contexto) =>
+            app.MapGet("/tamanhos", async (KFContext contexto) =>
             {
-                return contexto.TamanhosMarmita.Select(tamanho => TamanhoResponse.De(tamanho));
+                return await contexto.TamanhosMarmita.Select(tamanho => TamanhoResponse.De(tamanho)).ToListAsync();
             });
 
-            app.MapGet("/tamanhos/{id}", (int id, KFContext contexto) =>
+            app.MapGet("/tamanhos/{id}", async (int id, KFContext contexto) =>
                 {
-                    TamanhoMarmita? tamanho = contexto.TamanhosMarmita.Find(id);
+                    TamanhoMarmita? tamanho = await contexto.TamanhosMarmita.FindAsync(id);
                     if (tamanho == null)
                     {
                         return Results.Problem(detail: $"O tamanho com o id '{id}' não foi encontrado.", statusCode: StatusCodes.Status404NotFound);
@@ -114,20 +114,20 @@ namespace KFRestaurante
                 });
 
 
-            app.MapPost("/tamanhos", (CriarTamanhoRequest request, KFContext contexto) =>
+            app.MapPost("/tamanhos", async (CriarTamanhoRequest request, KFContext contexto) =>
             {
-                if (contexto.TamanhosMarmita.Any(tamanho => tamanho.Nome == request.Nome))
+                if (await contexto.TamanhosMarmita.AnyAsync(tamanho => tamanho.Nome == request.Nome))
                 {
                     return Results.Problem(detail: $"O tamanho com o nome '{request.Nome}' já existe.", statusCode: StatusCodes.Status409Conflict);
                 }
 
                 TamanhoMarmita tamanho1 = new TamanhoMarmita(request.Nome, request.Preco, request.LimitedeComponente);
                 contexto.Add(tamanho1);
-                contexto.SaveChanges();
+                await contexto.SaveChangesAsync();
                 return Results.Created($"/tamanhos/{tamanho1.Id}", TamanhoResponse.De(tamanho1));
             });
 
-            app.MapPost("/cardapios", (CriarCardapioRequest request, KFContext contexto) =>
+            app.MapPost("/cardapios", async (CriarCardapioRequest request, KFContext contexto) =>
             {
                 List<int> idsRepetidos = request.OpcoesIds
                     .GroupBy(id => id)
@@ -142,12 +142,12 @@ namespace KFRestaurante
 
                 DateOnly hoje = DateOnly.FromDateTime(DateTime.Now);
 
-                if (contexto.CardapiosDoDia.Any(cardapio => cardapio.DataPublicacao == hoje))
+                if (await contexto.CardapiosDoDia.AnyAsync(cardapio => cardapio.DataPublicacao == hoje))
                 {
                     return Results.Problem(detail: $"Já existe um cardápio para a data {hoje:dd/MM/yyyy}.", statusCode: StatusCodes.Status409Conflict);
                 }
 
-                List<Opcao> opcoes = contexto.Opcoes.Where(opcao => request.OpcoesIds.Contains(opcao.Id)).ToList();
+                List<Opcao> opcoes = await contexto.Opcoes.Where(opcao => request.OpcoesIds.Contains(opcao.Id)).ToListAsync();
 
                 List<int> idsInvalidos = request.OpcoesIds.Except(opcoes.Select(opcao => opcao.Id)).ToList();
 
@@ -164,16 +164,16 @@ namespace KFRestaurante
                 }
 
                 contexto.Add(cardapio1);
-                contexto.SaveChanges();
+                await contexto.SaveChangesAsync();
 
                 return Results.Created($"/cardapios/{cardapio1.Id}", CardapioResponse.De(cardapio1));
             });
 
-            app.MapGet("/cardapios/{id}", (int id, KFContext contexto) =>
+            app.MapGet("/cardapios/{id}", async (int id, KFContext contexto) =>
             {
-                CardapioDoDia? cardapio = contexto.CardapiosDoDia
+                CardapioDoDia? cardapio = await contexto.CardapiosDoDia
                     .Include(cardapio => cardapio.Opcoes)
-                    .FirstOrDefault(cardapio => cardapio.Id == id);
+                    .FirstOrDefaultAsync(cardapio => cardapio.Id == id);
 
                 if (cardapio == null)
                 {
@@ -183,11 +183,11 @@ namespace KFRestaurante
                 return Results.Ok(CardapioResponse.De(cardapio));
             });
 
-            app.MapPost("/cardapios/{id}/publicar", (int id, KFContext contexto) =>
+            app.MapPost("/cardapios/{id}/publicar", async (int id, KFContext contexto) =>
             {
-                CardapioDoDia? cardapio = contexto.CardapiosDoDia
+                CardapioDoDia? cardapio = await contexto.CardapiosDoDia
                     .Include(cardapio => cardapio.Opcoes)
-                    .FirstOrDefault(cardapio => cardapio.Id == id);
+                    .FirstOrDefaultAsync(cardapio => cardapio.Id == id);
 
                 if (cardapio == null)
                 {
@@ -195,16 +195,16 @@ namespace KFRestaurante
                 }
 
                 cardapio.Publicar();
-                contexto.SaveChanges();
+                await contexto.SaveChangesAsync();
 
                 return Results.Ok(CardapioResponse.De(cardapio));
             });
 
-            app.MapPost("/cardapios/{id}/fechar", (int id, KFContext contexto) =>
+            app.MapPost("/cardapios/{id}/fechar", async (int id, KFContext contexto) =>
             {
-                CardapioDoDia? cardapio = contexto.CardapiosDoDia
+                CardapioDoDia? cardapio = await contexto.CardapiosDoDia
                     .Include(cardapio => cardapio.Opcoes)
-                    .FirstOrDefault(cardapio => cardapio.Id == id);
+                    .FirstOrDefaultAsync(cardapio => cardapio.Id == id);
 
                 if (cardapio == null)
                 {
@@ -212,14 +212,14 @@ namespace KFRestaurante
                 }
 
                 cardapio.Fechar();
-                contexto.SaveChanges();
+                await contexto.SaveChangesAsync();
 
                 return Results.Ok(CardapioResponse.De(cardapio));
             });
 
-            app.MapGet("/restaurante", (KFContext contexto) =>
+            app.MapGet("/restaurante", async (KFContext contexto) =>
             {
-                Restaurante? restaurante = contexto.Restaurantes.OrderBy(r => r.Id).FirstOrDefault();
+                Restaurante? restaurante = await contexto.Restaurantes.OrderBy(r => r.Id).FirstOrDefaultAsync();
 
                 if (restaurante == null)
                 {
@@ -229,9 +229,9 @@ namespace KFRestaurante
                 return Results.Ok(RestauranteResponse.De(restaurante));
             });
 
-            app.MapPost("/restaurante/abrir", (KFContext contexto) =>
+            app.MapPost("/restaurante/abrir", async (KFContext contexto) =>
             {
-                Restaurante? restaurante = contexto.Restaurantes.OrderBy(r => r.Id).FirstOrDefault();
+                Restaurante? restaurante = await contexto.Restaurantes.OrderBy(r => r.Id).FirstOrDefaultAsync();
 
                 if (restaurante == null)
                 {
@@ -240,14 +240,14 @@ namespace KFRestaurante
                 }
 
                 restaurante.Abrir();
-                contexto.SaveChanges();
+                await contexto.SaveChangesAsync();
 
                 return Results.Ok(RestauranteResponse.De(restaurante));
             });
 
-            app.MapPost("/restaurante/fechar", (KFContext contexto) =>
+            app.MapPost("/restaurante/fechar", async (KFContext contexto) =>
             {
-                Restaurante? restaurante = contexto.Restaurantes.OrderBy(r => r.Id).FirstOrDefault();
+                Restaurante? restaurante = await contexto.Restaurantes.OrderBy(r => r.Id).FirstOrDefaultAsync();
 
                 if (restaurante == null)
                 {
@@ -256,12 +256,12 @@ namespace KFRestaurante
                 }
 
                 restaurante.Fechar();
-                contexto.SaveChanges();
+                await contexto.SaveChangesAsync();
 
                 return Results.Ok(RestauranteResponse.De(restaurante));
             });
 
-            app.MapPost("/pedidos", (CriarPedidoRequest request, KFContext contexto) =>
+            app.MapPost("/pedidos", async (CriarPedidoRequest request, KFContext contexto) =>
             {
                 // 1. formato do request (sem ir ao banco)
                 if (request.Itens == null || request.Itens.Count == 0)
@@ -287,9 +287,9 @@ namespace KFRestaurante
                 }
 
                 // 2. tudo que ja existe vem do banco
-                CardapioDoDia? cardapio = contexto.CardapiosDoDia
+                CardapioDoDia? cardapio = await contexto.CardapiosDoDia
                     .Include(c => c.Opcoes)
-                    .FirstOrDefault(c => c.Id == request.CardapioId);
+                    .FirstOrDefaultAsync(c => c.Id == request.CardapioId);
 
                 if (cardapio == null)
                 {
@@ -303,9 +303,9 @@ namespace KFRestaurante
                     .Distinct()
                     .ToList();
 
-                Dictionary<int, Opcao> opcoes = contexto.Opcoes
+                Dictionary<int, Opcao> opcoes = await contexto.Opcoes
                     .Where(opcao => idsOpcoes.Contains(opcao.Id))
-                    .ToDictionary(opcao => opcao.Id);
+                    .ToDictionaryAsync(opcao => opcao.Id);
 
                 List<int> idsOpcoesInvalidos = idsOpcoes.Where(id => !opcoes.ContainsKey(id)).ToList();
 
@@ -320,9 +320,9 @@ namespace KFRestaurante
                     .Distinct()
                     .ToList();
 
-                Dictionary<int, TamanhoMarmita> tamanhos = contexto.TamanhosMarmita
+                Dictionary<int, TamanhoMarmita> tamanhos = await contexto.TamanhosMarmita
                     .Where(tamanho => idsTamanhos.Contains(tamanho.Id))
-                    .ToDictionary(tamanho => tamanho.Id);
+                    .ToDictionaryAsync(tamanho => tamanho.Id);
 
                 List<int> idsTamanhosInvalidos = idsTamanhos.Where(id => !tamanhos.ContainsKey(id)).ToList();
 
@@ -332,7 +332,7 @@ namespace KFRestaurante
                 }
 
                 // sem linha no banco = restaurante fechado, e o dominio recusa
-                Restaurante restaurante = contexto.Restaurantes.OrderBy(r => r.Id).FirstOrDefault() ?? new Restaurante();
+                Restaurante restaurante = await contexto.Restaurantes.OrderBy(r => r.Id).FirstOrDefaultAsync() ?? new Restaurante();
 
                 // 3. o dominio monta o pedido e aplica as regras (DominioException vira 400 no ManipuladorDeExcecoes)
                 Pedido pedido = new Pedido(request.FormaDePagamento, request.TipoDeEntrega, request.Endereco, restaurante, cardapio);
@@ -356,17 +356,17 @@ namespace KFRestaurante
                 }
 
                 contexto.Add(pedido);
-                contexto.SaveChanges(); // o banco gera o Numero pela sequence e o EF le de volta
+                await contexto.SaveChangesAsync(); // o banco gera o Numero pela sequence e o EF le de volta
 
                 return Results.Created($"/pedidos/{pedido.Id}", PedidoResponse.De(pedido));
             });
 
-            app.MapGet("/pedidos/{id}", (int id, KFContext contexto) =>
+            app.MapGet("/pedidos/{id}", async (int id, KFContext contexto) =>
             {
-                Pedido? pedido = contexto.Pedidos
+                Pedido? pedido = await contexto.Pedidos
                     .Include(p => p.Itens)
                     .Include(p => p.CardapioDoDia)
-                    .FirstOrDefault(p => p.Id == id);
+                    .FirstOrDefaultAsync(p => p.Id == id);
 
                 if (pedido == null)
                 {
