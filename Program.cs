@@ -18,6 +18,13 @@ namespace KFRestaurante
 
             });
 
+            // o Swagger (Swashbuckle) le as opcoes de JSON do MVC, nao as do minimal API acima.
+            // Sem isto ele documenta os enums como numeros (0, 1, 2...) embora a API responda com nomes
+            builder.Services.Configure<Microsoft.AspNetCore.Mvc.JsonOptions>(options =>
+            {
+                options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+            });
+
             var connectionString = builder.Configuration.GetConnectionString("KFRestaurante");
             builder.Services.AddDbContext<KFContext>(options => options.UseNpgsql(connectionString));
 
