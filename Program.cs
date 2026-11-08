@@ -45,7 +45,8 @@ namespace KFRestaurante
                 return await contexto.Opcoes.Select(opcao => OpcaoResponse.De(opcao)).ToListAsync();
 
 
-            });
+            })
+                .Produces<List<OpcaoResponse>>(StatusCodes.Status200OK);
 
 
 
@@ -66,7 +67,10 @@ namespace KFRestaurante
 
                 return Results.Created($"/opcoes/{opcao1.Id}", OpcaoResponse.De(opcao1));
 
-            });
+            })
+                .Produces<OpcaoResponse>(StatusCodes.Status201Created)
+                .ProducesProblem(StatusCodes.Status400BadRequest)
+                .ProducesProblem(StatusCodes.Status409Conflict);
 
             app.MapGet("/opcoes/{id}", async (int id, KFContext contexto) =>
             {
@@ -81,7 +85,9 @@ namespace KFRestaurante
 
                 return Results.Ok(OpcaoResponse.De(opcao));
 
-            });
+            })
+                .Produces<OpcaoResponse>(StatusCodes.Status200OK)
+                .ProducesProblem(StatusCodes.Status404NotFound);
 
             app.MapPatch("/opcoes/{id}/esgotado", async (int id, AlterarEsgotadoRequest request, KFContext contexto) =>
             {
@@ -96,12 +102,16 @@ namespace KFRestaurante
                 await contexto.SaveChangesAsync();
 
                 return Results.Ok(OpcaoResponse.De(opcao));
-            });
+            })
+                .Produces<OpcaoResponse>(StatusCodes.Status200OK)
+                .ProducesProblem(StatusCodes.Status400BadRequest)
+                .ProducesProblem(StatusCodes.Status404NotFound);
 
             app.MapGet("/tamanhos", async (KFContext contexto) =>
             {
                 return await contexto.TamanhosMarmita.Select(tamanho => TamanhoResponse.De(tamanho)).ToListAsync();
-            });
+            })
+                .Produces<List<TamanhoResponse>>(StatusCodes.Status200OK);
 
             app.MapGet("/tamanhos/{id}", async (int id, KFContext contexto) =>
                 {
@@ -111,7 +121,9 @@ namespace KFRestaurante
                         return Results.Problem(detail: $"O tamanho com o id '{id}' não foi encontrado.", statusCode: StatusCodes.Status404NotFound);
                     }
                     return Results.Ok(TamanhoResponse.De(tamanho));
-                });
+                })
+                .Produces<TamanhoResponse>(StatusCodes.Status200OK)
+                .ProducesProblem(StatusCodes.Status404NotFound);
 
 
             app.MapPost("/tamanhos", async (CriarTamanhoRequest request, KFContext contexto) =>
@@ -125,7 +137,10 @@ namespace KFRestaurante
                 contexto.Add(tamanho1);
                 await contexto.SaveChangesAsync();
                 return Results.Created($"/tamanhos/{tamanho1.Id}", TamanhoResponse.De(tamanho1));
-            });
+            })
+                .Produces<TamanhoResponse>(StatusCodes.Status201Created)
+                .ProducesProblem(StatusCodes.Status400BadRequest)
+                .ProducesProblem(StatusCodes.Status409Conflict);
 
             app.MapPost("/cardapios", async (CriarCardapioRequest request, KFContext contexto) =>
             {
@@ -167,7 +182,10 @@ namespace KFRestaurante
                 await contexto.SaveChangesAsync();
 
                 return Results.Created($"/cardapios/{cardapio1.Id}", CardapioResponse.De(cardapio1));
-            });
+            })
+                .Produces<CardapioResponse>(StatusCodes.Status201Created)
+                .ProducesProblem(StatusCodes.Status400BadRequest)
+                .ProducesProblem(StatusCodes.Status409Conflict);
 
             app.MapGet("/cardapios/{id}", async (int id, KFContext contexto) =>
             {
@@ -181,7 +199,9 @@ namespace KFRestaurante
                 }
 
                 return Results.Ok(CardapioResponse.De(cardapio));
-            });
+            })
+                .Produces<CardapioResponse>(StatusCodes.Status200OK)
+                .ProducesProblem(StatusCodes.Status404NotFound);
 
             app.MapPost("/cardapios/{id}/publicar", async (int id, KFContext contexto) =>
             {
@@ -198,7 +218,10 @@ namespace KFRestaurante
                 await contexto.SaveChangesAsync();
 
                 return Results.Ok(CardapioResponse.De(cardapio));
-            });
+            })
+                .Produces<CardapioResponse>(StatusCodes.Status200OK)
+                .ProducesProblem(StatusCodes.Status400BadRequest)
+                .ProducesProblem(StatusCodes.Status404NotFound);
 
             app.MapPost("/cardapios/{id}/fechar", async (int id, KFContext contexto) =>
             {
@@ -215,7 +238,10 @@ namespace KFRestaurante
                 await contexto.SaveChangesAsync();
 
                 return Results.Ok(CardapioResponse.De(cardapio));
-            });
+            })
+                .Produces<CardapioResponse>(StatusCodes.Status200OK)
+                .ProducesProblem(StatusCodes.Status400BadRequest)
+                .ProducesProblem(StatusCodes.Status404NotFound);
 
             app.MapGet("/restaurante", async (KFContext contexto) =>
             {
@@ -227,7 +253,8 @@ namespace KFRestaurante
                 }
 
                 return Results.Ok(RestauranteResponse.De(restaurante));
-            });
+            })
+                .Produces<RestauranteResponse>(StatusCodes.Status200OK);
 
             app.MapPost("/restaurante/abrir", async (KFContext contexto) =>
             {
@@ -243,7 +270,8 @@ namespace KFRestaurante
                 await contexto.SaveChangesAsync();
 
                 return Results.Ok(RestauranteResponse.De(restaurante));
-            });
+            })
+                .Produces<RestauranteResponse>(StatusCodes.Status200OK);
 
             app.MapPost("/restaurante/fechar", async (KFContext contexto) =>
             {
@@ -259,7 +287,8 @@ namespace KFRestaurante
                 await contexto.SaveChangesAsync();
 
                 return Results.Ok(RestauranteResponse.De(restaurante));
-            });
+            })
+                .Produces<RestauranteResponse>(StatusCodes.Status200OK);
 
             app.MapPost("/pedidos", async (CriarPedidoRequest request, KFContext contexto) =>
             {
@@ -359,7 +388,9 @@ namespace KFRestaurante
                 await contexto.SaveChangesAsync(); // o banco gera o Numero pela sequence e o EF le de volta
 
                 return Results.Created($"/pedidos/{pedido.Id}", PedidoResponse.De(pedido));
-            });
+            })
+                .Produces<PedidoResponse>(StatusCodes.Status201Created)
+                .ProducesProblem(StatusCodes.Status400BadRequest);
 
             app.MapGet("/pedidos/{id}", async (int id, KFContext contexto) =>
             {
@@ -374,7 +405,9 @@ namespace KFRestaurante
                 }
 
                 return Results.Ok(PedidoResponse.De(pedido));
-            });
+            })
+                .Produces<PedidoResponse>(StatusCodes.Status200OK)
+                .ProducesProblem(StatusCodes.Status404NotFound);
 
 
                 app.UseSwagger();
