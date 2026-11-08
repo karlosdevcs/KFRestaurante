@@ -29,7 +29,12 @@ namespace KFRestaurante
 
             builder.Services.AddSwaggerGen();
 
+            builder.Services.AddProblemDetails();
+            builder.Services.AddExceptionHandler<ManipuladorDeExcecoes>();
+
             var app = builder.Build();
+
+            app.UseExceptionHandler(); // toda excecao nao tratada passa pelo ManipuladorDeExcecoes
 
 
 
@@ -49,7 +54,7 @@ namespace KFRestaurante
             {
                 if (contexto.Opcoes.Any(opcao => opcao.Nome == request.Nome))
                 {
-                    return Results.Conflict($"A opção com o nome '{request.Nome}' já existe.");
+                    return Results.Problem(detail: $"A opção com o nome '{request.Nome}' já existe.", statusCode: StatusCodes.Status409Conflict);
                 }
 
                 Opcao opcao1 = new Opcao(request.Nome, request.Categoria, request.Preco);
@@ -70,7 +75,7 @@ namespace KFRestaurante
 
                 if (opcao == null)
                 {
-                    return Results.NotFound($"A opção com o id '{id}' não foi encontrada.");
+                    return Results.Problem(detail: $"A opção com o id '{id}' não foi encontrada.", statusCode: StatusCodes.Status404NotFound);
                 }
 
 
@@ -84,7 +89,7 @@ namespace KFRestaurante
 
                 if (opcao == null)
                 {
-                    return Results.NotFound($"A opção com o id '{id}' não foi encontrada.");
+                    return Results.Problem(detail: $"A opção com o id '{id}' não foi encontrada.", statusCode: StatusCodes.Status404NotFound);
                 }
 
                 opcao.AlterarEsgotado(request.Esgotado);
@@ -103,7 +108,7 @@ namespace KFRestaurante
                     TamanhoMarmita? tamanho = contexto.TamanhosMarmita.Find(id);
                     if (tamanho == null)
                     {
-                        return Results.NotFound($"O tamanho com o id '{id}' não foi encontrado.");
+                        return Results.Problem(detail: $"O tamanho com o id '{id}' não foi encontrado.", statusCode: StatusCodes.Status404NotFound);
                     }
                     return Results.Ok(TamanhoResponse.De(tamanho));
                 });
@@ -113,7 +118,7 @@ namespace KFRestaurante
             {
                 if (contexto.TamanhosMarmita.Any(tamanho => tamanho.Nome == request.Nome))
                 {
-                    return Results.Conflict($"O tamanho com o nome '{request.Nome}' já existe.");
+                    return Results.Problem(detail: $"O tamanho com o nome '{request.Nome}' já existe.", statusCode: StatusCodes.Status409Conflict);
                 }
 
                 TamanhoMarmita tamanho1 = new TamanhoMarmita(request.Nome, request.Preco, request.LimitedeComponente);
@@ -132,14 +137,14 @@ namespace KFRestaurante
 
                 if (idsRepetidos.Count > 0)
                 {
-                    return Results.BadRequest($"Ids enviados mais de uma vez: {string.Join(", ", idsRepetidos)}.");
+                    return Results.Problem(detail: $"Ids enviados mais de uma vez: {string.Join(", ", idsRepetidos)}.", statusCode: StatusCodes.Status400BadRequest);
                 }
 
                 DateOnly hoje = DateOnly.FromDateTime(DateTime.Now);
 
                 if (contexto.CardapiosDoDia.Any(cardapio => cardapio.DataPublicacao == hoje))
                 {
-                    return Results.Conflict($"Já existe um cardápio para a data {hoje:dd/MM/yyyy}.");
+                    return Results.Problem(detail: $"Já existe um cardápio para a data {hoje:dd/MM/yyyy}.", statusCode: StatusCodes.Status409Conflict);
                 }
 
                 List<Opcao> opcoes = contexto.Opcoes.Where(opcao => request.OpcoesIds.Contains(opcao.Id)).ToList();
@@ -148,7 +153,7 @@ namespace KFRestaurante
 
                 if (idsInvalidos.Count > 0)
                 {
-                    return Results.BadRequest($"Ids de opções não encontrados: {string.Join(", ", idsInvalidos)}.");
+                    return Results.Problem(detail: $"Ids de opções não encontrados: {string.Join(", ", idsInvalidos)}.", statusCode: StatusCodes.Status400BadRequest);
                 }
 
                 CardapioDoDia cardapio1 = new CardapioDoDia(hoje);
@@ -172,7 +177,7 @@ namespace KFRestaurante
 
                 if (cardapio == null)
                 {
-                    return Results.NotFound($"O cardápio com o id '{id}' não foi encontrado.");
+                    return Results.Problem(detail: $"O cardápio com o id '{id}' não foi encontrado.", statusCode: StatusCodes.Status404NotFound);
                 }
 
                 return Results.Ok(CardapioResponse.De(cardapio));
@@ -186,18 +191,10 @@ namespace KFRestaurante
 
                 if (cardapio == null)
                 {
-                    return Results.NotFound($"O cardápio com o id '{id}' não foi encontrado.");
+                    return Results.Problem(detail: $"O cardápio com o id '{id}' não foi encontrado.", statusCode: StatusCodes.Status404NotFound);
                 }
 
-                try
-                {
-                    cardapio.Publicar();
-                }
-                catch (InvalidOperationException ex)
-                {
-                    return Results.BadRequest(ex.Message);
-                }
-
+                cardapio.Publicar();
                 contexto.SaveChanges();
 
                 return Results.Ok(CardapioResponse.De(cardapio));
@@ -211,18 +208,10 @@ namespace KFRestaurante
 
                 if (cardapio == null)
                 {
-                    return Results.NotFound($"O cardápio com o id '{id}' não foi encontrado.");
+                    return Results.Problem(detail: $"O cardápio com o id '{id}' não foi encontrado.", statusCode: StatusCodes.Status404NotFound);
                 }
 
-                try
-                {
-                    cardapio.Fechar();
-                }
-                catch (InvalidOperationException ex)
-                {
-                    return Results.BadRequest(ex.Message);
-                }
-
+                cardapio.Fechar();
                 contexto.SaveChanges();
 
                 return Results.Ok(CardapioResponse.De(cardapio));
@@ -277,7 +266,7 @@ namespace KFRestaurante
                 // 1. formato do request (sem ir ao banco)
                 if (request.Itens == null || request.Itens.Count == 0)
                 {
-                    return Results.BadRequest("O pedido precisa ter ao menos um item.");
+                    return Results.Problem(detail: "O pedido precisa ter ao menos um item.", statusCode: StatusCodes.Status400BadRequest);
                 }
 
                 for (int i = 0; i < request.Itens.Count; i++)
@@ -288,12 +277,12 @@ namespace KFRestaurante
 
                     if (ehAvulso == ehMarmita)
                     {
-                        return Results.BadRequest($"Item {i + 1}: informe OpcaoId (item avulso) ou TamanhoId com ComponentesIds (marmita), nunca os dois nem nenhum.");
+                        return Results.Problem(detail: $"Item {i + 1}: informe OpcaoId (item avulso) ou TamanhoId com ComponentesIds (marmita), nunca os dois nem nenhum.", statusCode: StatusCodes.Status400BadRequest);
                     }
 
                     if (ehAvulso && item.ComponentesIds != null && item.ComponentesIds.Count > 0)
                     {
-                        return Results.BadRequest($"Item {i + 1}: ComponentesIds só vale para marmita.");
+                        return Results.Problem(detail: $"Item {i + 1}: ComponentesIds só vale para marmita.", statusCode: StatusCodes.Status400BadRequest);
                     }
                 }
 
@@ -304,7 +293,7 @@ namespace KFRestaurante
 
                 if (cardapio == null)
                 {
-                    return Results.BadRequest($"O cardápio com o id '{request.CardapioId}' não foi encontrado.");
+                    return Results.Problem(detail: $"O cardápio com o id '{request.CardapioId}' não foi encontrado.", statusCode: StatusCodes.Status400BadRequest);
                 }
 
                 List<int> idsOpcoes = request.Itens
@@ -322,7 +311,7 @@ namespace KFRestaurante
 
                 if (idsOpcoesInvalidos.Count > 0)
                 {
-                    return Results.BadRequest($"Ids de opções não encontrados: {string.Join(", ", idsOpcoesInvalidos)}.");
+                    return Results.Problem(detail: $"Ids de opções não encontrados: {string.Join(", ", idsOpcoesInvalidos)}.", statusCode: StatusCodes.Status400BadRequest);
                 }
 
                 List<int> idsTamanhos = request.Itens
@@ -339,40 +328,31 @@ namespace KFRestaurante
 
                 if (idsTamanhosInvalidos.Count > 0)
                 {
-                    return Results.BadRequest($"Ids de tamanhos não encontrados: {string.Join(", ", idsTamanhosInvalidos)}.");
+                    return Results.Problem(detail: $"Ids de tamanhos não encontrados: {string.Join(", ", idsTamanhosInvalidos)}.", statusCode: StatusCodes.Status400BadRequest);
                 }
 
                 // sem linha no banco = restaurante fechado, e o dominio recusa
                 Restaurante restaurante = contexto.Restaurantes.OrderBy(r => r.Id).FirstOrDefault() ?? new Restaurante();
 
-                // 3. o dominio monta o pedido e aplica as regras
-                Pedido pedido;
+                // 3. o dominio monta o pedido e aplica as regras (DominioException vira 400 no ManipuladorDeExcecoes)
+                Pedido pedido = new Pedido(request.FormaDePagamento, request.TipoDeEntrega, request.Endereco, restaurante, cardapio);
 
-                try
+                foreach (CriarItemDoPedidoRequest item in request.Itens)
                 {
-                    pedido = new Pedido(request.FormaDePagamento, request.TipoDeEntrega, request.Endereco, restaurante, cardapio);
-
-                    foreach (CriarItemDoPedidoRequest item in request.Itens)
+                    if (item.OpcaoId != null)
                     {
-                        if (item.OpcaoId != null)
-                        {
-                            pedido.AdicionarItem(opcoes[item.OpcaoId.Value], item.Quantidade);
-                            continue;
-                        }
-
-                        Marmita marmita = new Marmita(tamanhos[item.TamanhoId!.Value]);
-
-                        foreach (int componenteId in item.ComponentesIds ?? new List<int>())
-                        {
-                            marmita.AdicionarOpcao(opcoes[componenteId]);
-                        }
-
-                        pedido.AdicionarItem(marmita, item.Quantidade);
+                        pedido.AdicionarItem(opcoes[item.OpcaoId.Value], item.Quantidade);
+                        continue;
                     }
-                }
-                catch (InvalidOperationException ex)
-                {
-                    return Results.BadRequest(ex.Message);
+
+                    Marmita marmita = new Marmita(tamanhos[item.TamanhoId!.Value]);
+
+                    foreach (int componenteId in item.ComponentesIds ?? new List<int>())
+                    {
+                        marmita.AdicionarOpcao(opcoes[componenteId]);
+                    }
+
+                    pedido.AdicionarItem(marmita, item.Quantidade);
                 }
 
                 contexto.Add(pedido);
@@ -390,7 +370,7 @@ namespace KFRestaurante
 
                 if (pedido == null)
                 {
-                    return Results.NotFound($"O pedido com o id '{id}' não foi encontrado.");
+                    return Results.Problem(detail: $"O pedido com o id '{id}' não foi encontrado.", statusCode: StatusCodes.Status404NotFound);
                 }
 
                 return Results.Ok(PedidoResponse.De(pedido));

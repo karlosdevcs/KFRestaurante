@@ -33,12 +33,12 @@ namespace KFRestaurante.Dominio
                 {
                   if (!CardapioDoDia.Opcoes.Any(o => o.Nome == c.Nome))// dentro do Any, o o é cada opção do cardápio, e o c é o componente da vez
                     {
-                        throw new InvalidOperationException("Esse componente nao esta disponivel hoje");
+                        throw new DominioException("Esse componente nao esta disponivel hoje");
                     }
 
                     if (c.Esgotado)
                     {
-                        throw new InvalidOperationException($"A opção {c.Nome} está esgotada.");
+                        throw new DominioException($"A opção {c.Nome} está esgotada.");
                     }
 
                 }
@@ -47,12 +47,12 @@ namespace KFRestaurante.Dominio
             {
                 if (!CardapioDoDia.Opcoes.Any(o => o.Nome == pedivel.Nome))
                 {
-                    throw new InvalidOperationException("Esse item nao existe na lista de Opcoes");
+                    throw new DominioException("Esse item nao existe na lista de Opcoes");
                 }
 
                 if (pedivel is Opcao opcao && opcao.Esgotado)
                 {
-                    throw new InvalidOperationException($"A opção {opcao.Nome} está esgotada.");
+                    throw new DominioException($"A opção {opcao.Nome} está esgotada.");
                 }
             }
 
@@ -71,15 +71,15 @@ namespace KFRestaurante.Dominio
 
             if (!restaurante.Aberto)
             {
-                throw new InvalidOperationException("O restaurante esta fechado");
+                throw new DominioException("O restaurante esta fechado");
             }
             if (cardapio.Situacao != SituacaoCardapio.Publicado)
             {
-                throw new InvalidOperationException("O cardapio nao esta publicado");
+                throw new DominioException("O cardapio nao esta publicado");
             }
             if (tipodeentrega == TipoDeEntrega.Entrega && string.IsNullOrWhiteSpace(endereco))
             {
-                throw new InvalidOperationException("O endereço é obrigatório para pedidos com entrega.");
+                throw new DominioException("O endereço é obrigatório para pedidos com entrega.");
             }
 
             this.HoraPedido = DateTime.UtcNow; // UTC: o Postgres (timestamptz) nao aceita hora local

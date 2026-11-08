@@ -30,7 +30,7 @@ namespace KFRestaurante.Dominio
 
 				if (jaExiste == true)
 				{
-					throw new InvalidOperationException("Esta opcao ja existe");
+					throw new DominioException("Esta opcao ja existe");
 
 				} else
 				{
@@ -44,7 +44,7 @@ namespace KFRestaurante.Dominio
 			if (_opcoes.Count == 0)
 				
 			{
-				throw new InvalidOperationException("Nao e possivel publicar um cardapio vazio");
+				throw new DominioException("Nao e possivel publicar um cardapio vazio");
 
 			} else
 			{
@@ -57,7 +57,7 @@ namespace KFRestaurante.Dominio
 		{
 			if (this.Situacao == SituacaoCardapio.Rascunho)
 			{
-				throw new InvalidOperationException("Não é possível fechar um cardápio em rascunho.");
+				throw new DominioException("Não é possível fechar um cardápio em rascunho.");
 			}
 
 			this.Situacao = SituacaoCardapio.Fechado; // ja fechado: continua fechado, sem erro (idempotente, igual ao Publicar)

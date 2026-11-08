@@ -29,7 +29,7 @@ namespace KFRestaurante.Dominio
         {
             if (quantidade <= 0)
             {
-                throw new InvalidOperationException($"A quantidade deve ser maior que zero. Valor recebido: {quantidade}.");
+                throw new DominioException($"A quantidade deve ser maior que zero. Valor recebido: {quantidade}.");
             }
 
             this.PrecoUnitario = pedivel.Preco;

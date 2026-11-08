@@ -25,7 +25,7 @@ namespace KFRestaurante.Dominio
         {
             if ( _opcoes.Count >= Tamanho.LimitedeComponente)
             {
-                throw new InvalidOperationException("O limite de itens excedeu");
+                throw new DominioException("O limite de itens excedeu");
             } else
             {
                 _opcoes.Add(opcao);
