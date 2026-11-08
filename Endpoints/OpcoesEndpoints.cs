@@ -41,7 +41,7 @@ namespace KFRestaurante.Endpoints
                 .ProducesProblem(StatusCodes.Status400BadRequest)
                 .ProducesProblem(StatusCodes.Status409Conflict);
 
-            app.MapGet("/opcoes/{id}", async (int id, KFContext contexto) =>
+            app.MapGet("/opcoes/{id:int}", async (int id, KFContext contexto) =>
             {
 
                 Opcao? opcao = await contexto.Opcoes.FindAsync(id);
@@ -58,7 +58,7 @@ namespace KFRestaurante.Endpoints
                 .Produces<OpcaoResponse>(StatusCodes.Status200OK)
                 .ProducesProblem(StatusCodes.Status404NotFound);
 
-            app.MapPut("/opcoes/{id}", async (int id, AlterarOpcaoRequest request, KFContext contexto) =>
+            app.MapPut("/opcoes/{id:int}", async (int id, AlterarOpcaoRequest request, KFContext contexto) =>
             {
                 Opcao? opcao = await contexto.Opcoes.FindAsync(id);
 
@@ -83,7 +83,7 @@ namespace KFRestaurante.Endpoints
                 .ProducesProblem(StatusCodes.Status404NotFound)
                 .ProducesProblem(StatusCodes.Status409Conflict);
 
-            app.MapPatch("/opcoes/{id}/esgotado", async (int id, AlterarEsgotadoRequest request, KFContext contexto) =>
+            app.MapPatch("/opcoes/{id:int}/esgotado", async (int id, AlterarEsgotadoRequest request, KFContext contexto) =>
             {
                 Opcao? opcao = await contexto.Opcoes.FindAsync(id);
 

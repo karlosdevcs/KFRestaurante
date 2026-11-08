@@ -123,7 +123,7 @@ namespace KFRestaurante.Endpoints
                 .Produces<PedidoResponse>(StatusCodes.Status201Created)
                 .ProducesProblem(StatusCodes.Status400BadRequest);
 
-            app.MapGet("/pedidos/{id}", async (int id, KFContext contexto) =>
+            app.MapGet("/pedidos/{id:int}", async (int id, KFContext contexto) =>
             {
                 Pedido? pedido = await contexto.Pedidos
                     .Include(p => p.Itens)

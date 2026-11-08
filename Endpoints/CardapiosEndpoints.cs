@@ -77,7 +77,7 @@ namespace KFRestaurante.Endpoints
                 .Produces<CardapioResponse>(StatusCodes.Status200OK)
                 .ProducesProblem(StatusCodes.Status404NotFound);
 
-            app.MapGet("/cardapios/{id}", async (int id, KFContext contexto) =>
+            app.MapGet("/cardapios/{id:int}", async (int id, KFContext contexto) =>
             {
                 CardapioDoDia? cardapio = await contexto.CardapiosDoDia
                     .Include(cardapio => cardapio.Opcoes)
@@ -93,7 +93,7 @@ namespace KFRestaurante.Endpoints
                 .Produces<CardapioResponse>(StatusCodes.Status200OK)
                 .ProducesProblem(StatusCodes.Status404NotFound);
 
-            app.MapPost("/cardapios/{id}/publicar", async (int id, KFContext contexto) =>
+            app.MapPost("/cardapios/{id:int}/publicar", async (int id, KFContext contexto) =>
             {
                 CardapioDoDia? cardapio = await contexto.CardapiosDoDia
                     .Include(cardapio => cardapio.Opcoes)
@@ -113,7 +113,7 @@ namespace KFRestaurante.Endpoints
                 .ProducesProblem(StatusCodes.Status400BadRequest)
                 .ProducesProblem(StatusCodes.Status404NotFound);
 
-            app.MapPost("/cardapios/{id}/fechar", async (int id, KFContext contexto) =>
+            app.MapPost("/cardapios/{id:int}/fechar", async (int id, KFContext contexto) =>
             {
                 CardapioDoDia? cardapio = await contexto.CardapiosDoDia
                     .Include(cardapio => cardapio.Opcoes)

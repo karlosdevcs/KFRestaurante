@@ -15,7 +15,7 @@ namespace KFRestaurante.Endpoints
             })
                 .Produces<List<TamanhoResponse>>(StatusCodes.Status200OK);
 
-            app.MapGet("/tamanhos/{id}", async (int id, KFContext contexto) =>
+            app.MapGet("/tamanhos/{id:int}", async (int id, KFContext contexto) =>
                 {
                     TamanhoMarmita? tamanho = await contexto.TamanhosMarmita.FindAsync(id);
                     if (tamanho == null)
@@ -44,7 +44,7 @@ namespace KFRestaurante.Endpoints
                 .ProducesProblem(StatusCodes.Status400BadRequest)
                 .ProducesProblem(StatusCodes.Status409Conflict);
 
-            app.MapPut("/tamanhos/{id}", async (int id, AlterarTamanhoRequest request, KFContext contexto) =>
+            app.MapPut("/tamanhos/{id:int}", async (int id, AlterarTamanhoRequest request, KFContext contexto) =>
             {
                 TamanhoMarmita? tamanho = await contexto.TamanhosMarmita.FindAsync(id);
 
@@ -69,7 +69,7 @@ namespace KFRestaurante.Endpoints
                 .ProducesProblem(StatusCodes.Status404NotFound)
                 .ProducesProblem(StatusCodes.Status409Conflict);
 
-            app.MapPut("/tamanhos/{id}/limites", async (int id, AlterarLimitesRequest request, KFContext contexto) =>
+            app.MapPut("/tamanhos/{id:int}/limites", async (int id, AlterarLimitesRequest request, KFContext contexto) =>
             {
                 if (request.Limites == null)
                 {
