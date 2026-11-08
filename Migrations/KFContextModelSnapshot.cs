@@ -84,7 +84,7 @@ namespace KFRestaurante.Migrations
                         .HasColumnType("text")
                         .HasColumnName("nome");
 
-                    b.Property<int?>("PedidoId")
+                    b.Property<int>("PedidoId")
                         .HasColumnType("integer")
                         .HasColumnName("pedidoid");
 
@@ -286,7 +286,9 @@ namespace KFRestaurante.Migrations
                 {
                     b.HasOne("KFRestaurante.Dominio.Pedido", null)
                         .WithMany("Itens")
-                        .HasForeignKey("PedidoId");
+                        .HasForeignKey("PedidoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("KFRestaurante.Dominio.Marmita", b =>

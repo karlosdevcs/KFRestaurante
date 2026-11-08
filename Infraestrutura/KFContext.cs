@@ -66,6 +66,14 @@ namespace KFRestaurante.Infraestrutura
                 .Property(p => p.Numero)
                 .HasDefaultValueSql("nextval('pedidos_numero_seq')");
 
+            // o item e parte do pedido: nao existe sem ele (FK obrigatoria) e some junto quando o pedido e apagado
+            modelBuilder.Entity<Pedido>()
+                .HasMany(p => p.Itens)
+                .WithOne()
+                .HasForeignKey("PedidoId")
+                .IsRequired()
+                .OnDelete(DeleteBehavior.Cascade);
+
             // apagar um cardapio NAO pode apagar os pedidos daquele dia (sao o historico de vendas)
             modelBuilder.Entity<Pedido>()
                 .HasOne(p => p.CardapioDoDia)
