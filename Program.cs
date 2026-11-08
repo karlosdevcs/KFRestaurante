@@ -213,6 +213,50 @@ namespace KFRestaurante
                 return Results.Ok(CardapioResponse.De(cardapio));
             });
 
+            app.MapGet("/restaurante", (KFContext contexto) =>
+            {
+                Restaurante? restaurante = contexto.Restaurantes.OrderBy(r => r.Id).FirstOrDefault();
+
+                if (restaurante == null)
+                {
+                    return Results.Ok(RestauranteResponse.De(new Restaurante())); // sem linha no banco = fechado
+                }
+
+                return Results.Ok(RestauranteResponse.De(restaurante));
+            });
+
+            app.MapPost("/restaurante/abrir", (KFContext contexto) =>
+            {
+                Restaurante? restaurante = contexto.Restaurantes.OrderBy(r => r.Id).FirstOrDefault();
+
+                if (restaurante == null)
+                {
+                    restaurante = new Restaurante();
+                    contexto.Add(restaurante);
+                }
+
+                restaurante.Abrir();
+                contexto.SaveChanges();
+
+                return Results.Ok(RestauranteResponse.De(restaurante));
+            });
+
+            app.MapPost("/restaurante/fechar", (KFContext contexto) =>
+            {
+                Restaurante? restaurante = contexto.Restaurantes.OrderBy(r => r.Id).FirstOrDefault();
+
+                if (restaurante == null)
+                {
+                    restaurante = new Restaurante();
+                    contexto.Add(restaurante);
+                }
+
+                restaurante.Fechar();
+                contexto.SaveChanges();
+
+                return Results.Ok(RestauranteResponse.De(restaurante));
+            });
+
 
                 app.UseSwagger();
                 app.UseSwaggerUI();
