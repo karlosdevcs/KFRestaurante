@@ -32,6 +32,12 @@ namespace KFRestaurante.Infraestrutura
                 .HasMany(m => m.Opcoes)
                 .WithMany();
 
+            // apagar um tamanho NAO pode apagar marmitas junto: o banco recusa enquanto houver marmita usando o tamanho
+            modelBuilder.Entity<Marmita>()
+                .HasOne(m => m.Tamanho)
+                .WithMany()
+                .OnDelete(DeleteBehavior.Restrict);
+
             modelBuilder.Entity<Opcao>()
                 .HasIndex(o => o.Nome)
                 .IsUnique();

@@ -294,7 +294,7 @@ namespace KFRestaurante.Migrations
                     b.HasOne("KFRestaurante.Dominio.TamanhoMarmita", "Tamanho")
                         .WithMany()
                         .HasForeignKey("TamanhoId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Tamanho");
