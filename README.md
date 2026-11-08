@@ -2,6 +2,8 @@
 
 API de pedidos para um restaurante de marmitas. O dono cadastra as opções, monta e publica o cardápio do dia e define como cada tamanho de marmita pode ser montado. O cliente faz o pedido escolhendo itens avulsos (uma Coca, uma porção de feijoada) ou marmitas montadas (tamanho + componentes).
 
+O pedido termina no **WhatsApp da loja**: a API devolve a mensagem pronta e um link `wa.me`. O cliente toca no link e só aperta enviar. A mensagem traz tudo o que a loja precisa para começar a preparar, sem nenhuma pergunta de volta.
+
 Projeto de estudo e portfólio: o foco está menos na quantidade de funcionalidades e mais em **modelar bem o domínio** e tomar decisões conscientes de persistência e de API.
 
 **Stack:** .NET 8 · ASP.NET Core Minimal API · EF Core 8 · PostgreSQL (Npgsql) · xUnit · Swagger
@@ -42,8 +44,8 @@ Projeto de estudo e portfólio: o foco está menos na quantidade de funcionalida
 
 1. `POST /opcoes` e `POST /tamanhos`: cadastra o que é vendido.
 2. `POST /cardapios` com os ids das opções e depois `POST /cardapios/{id}/publicar`.
-3. `POST /restaurante/abrir`.
-4. `POST /pedidos`.
+3. `PUT /restaurante/whatsapp` e `POST /restaurante/abrir`. O restaurante só abre com o WhatsApp cadastrado.
+4. `POST /pedidos`: a resposta traz `mensagemWhatsApp` e `linkWhatsApp`.
 
 ---
 
@@ -62,22 +64,47 @@ Projeto de estudo e portfólio: o foco está menos na quantidade de funcionalida
 | | `GET /cardapios/{id}` | Busca |
 | | `POST /cardapios/{id}/publicar` · `POST /cardapios/{id}/fechar` | Abre / encerra as vendas (publicar de novo reabre) |
 | **Restaurante** | `GET /restaurante` · `POST /restaurante/abrir` · `POST /restaurante/fechar` | Estado global: fechado bloqueia pedidos |
-| **Pedidos** | `POST /pedidos` · `GET /pedidos/{id}` | Cria / busca |
+| | `PUT /restaurante/whatsapp` | Número da loja, para onde o pedido é enviado |
+| **Pedidos** | `POST /pedidos` · `GET /pedidos/{id}` | Cria / busca, com a mensagem e o link do WhatsApp |
 
 Exemplo de pedido com um item avulso e uma marmita:
 
 ```json
 POST /pedidos
 {
+  "nomeCliente": "Maria",
   "cardapioId": 3,
-  "formaDePagamento": "Pix",
+  "formaDePagamento": "Dinheiro",
+  "trocoPara": 100,
   "tipoDeEntrega": "Entrega",
   "endereco": "Rua A, 10",
+  "referencia": "portão azul, ao lado da padaria",
+  "observacao": "sem cebola na feijoada",
   "itens": [
     { "opcaoId": 7, "quantidade": 1 },
     { "tamanhoId": 2, "componentesIds": [1, 1, 11], "quantidade": 2 }
   ]
 }
+```
+
+A mensagem que chega à loja (campo `mensagemWhatsApp` da resposta):
+
+```
+*Pedido nº 14*
+08/11/2026 às 20:00
+Cliente: Maria
+
+1x Feijoada — R$ 25,00
+2x Marmita M — R$ 40,00
+   Arroz, Arroz, Feijão Tropeiro
+
+*Total: R$ 65,00*
+
+Pagamento: Dinheiro – troco para R$ 100,00
+Entrega: Rua A, 10
+Referência: portão azul, ao lado da padaria
+
+Obs.: sem cebola na feijoada
 ```
 
 Todo erro volta no formato padrão **ProblemDetails** (RFC 9110), com a mensagem dizendo o que estava errado e com qual valor:
@@ -89,6 +116,14 @@ Todo erro volta no formato padrão **ProblemDetails** (RFC 9110), com a mensagem
 ---
 
 ## Decisões de projeto
+
+### O pedido chega completo no WhatsApp, sem perguntas
+
+O critério para cada campo do pedido foi: *"se faltar, a loja vai precisar perguntar?"*. Por isso o pedido tem nome do cliente, troco (e "sem troco" escrito por extenso quando não precisa), referência do endereço e observação livre.
+
+O envio usa o link **click-to-chat (`wa.me`)**, e não a API oficial da Meta. A API monta o texto, e o WhatsApp do próprio cliente abre com a mensagem pronta. Não tem custo nem aprovação, e a loja recebe do número do cliente, podendo responder direto. Bibliotecas não oficiais foram descartadas porque violam os termos do WhatsApp e podem levar ao banimento do número da loja. A contrapartida é que o sistema não confirma o envio: o relatório conta pedidos **gerados**.
+
+A montagem da mensagem fica fora do domínio (`Servicos/MensagemWhatsApp`): é formato de saída, não regra de negócio. Ela usa valores em formato brasileiro e horário de Brasília em qualquer servidor, e o restaurante só abre com o número da loja cadastrado.
 
 ### O pedido guarda uma foto, não uma referência
 
@@ -159,6 +194,7 @@ Dominio/            entidades e regras de negócio (sem dependência de EF ou HT
 DTOs/               requests e responses da API
 Endpoints/          rotas agrupadas por recurso (MapOpcoes, MapPedidos...)
 Infraestrutura/     KFContext (EF Core, Fluent API) e o tratamento global de erros
+Servicos/           montagem da mensagem e do link do WhatsApp
 Migrations/         histórico do esquema do banco
 KFRestaurante.Tests/  testes de unidade do domínio (xUnit)
 Program.cs          só configuração e registro das rotas
@@ -166,4 +202,4 @@ Program.cs          só configuração e registro das rotas
 
 ## Testes
 
-54 testes de unidade cobrem o domínio: o caminho feliz e cada regra que recusa (restaurante fechado, cardápio não publicado, opção esgotada, limite de componentes, porção dupla, preço congelado, entre outras). Eles não usam banco e rodam em menos de um segundo.
+89 testes de unidade cobrem o domínio e a mensagem do WhatsApp: o caminho feliz e cada regra que recusa (restaurante fechado, cardápio não publicado, opção esgotada, limite de componentes, porção dupla, preço congelado, troco menor que o total, entre outras), além do conteúdo exato da mensagem que a loja recebe. Eles não usam banco e rodam em menos de um segundo.
