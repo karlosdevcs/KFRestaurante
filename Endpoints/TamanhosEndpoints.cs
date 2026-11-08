@@ -44,6 +44,31 @@ namespace KFRestaurante.Endpoints
                 .ProducesProblem(StatusCodes.Status400BadRequest)
                 .ProducesProblem(StatusCodes.Status409Conflict);
 
+            app.MapPut("/tamanhos/{id}", async (int id, AlterarTamanhoRequest request, KFContext contexto) =>
+            {
+                TamanhoMarmita? tamanho = await contexto.TamanhosMarmita.FindAsync(id);
+
+                if (tamanho == null)
+                {
+                    return Results.Problem(detail: $"O tamanho com o id '{id}' não foi encontrado.", statusCode: StatusCodes.Status404NotFound);
+                }
+
+                // outro tamanho (id diferente) ja usa esse nome; manter o proprio nome e permitido
+                if (await contexto.TamanhosMarmita.AnyAsync(outro => outro.Nome == request.Nome && outro.Id != id))
+                {
+                    return Results.Problem(detail: $"O tamanho com o nome '{request.Nome}' já existe.", statusCode: StatusCodes.Status409Conflict);
+                }
+
+                tamanho.Alterar(request.Nome, request.Preco, request.LimitedeComponente);
+                await contexto.SaveChangesAsync();
+
+                return Results.Ok(TamanhoResponse.De(tamanho));
+            })
+                .Produces<TamanhoResponse>(StatusCodes.Status200OK)
+                .ProducesProblem(StatusCodes.Status400BadRequest)
+                .ProducesProblem(StatusCodes.Status404NotFound)
+                .ProducesProblem(StatusCodes.Status409Conflict);
+
             app.MapPut("/tamanhos/{id}/limites", async (int id, AlterarLimitesRequest request, KFContext contexto) =>
             {
                 if (request.Limites == null)

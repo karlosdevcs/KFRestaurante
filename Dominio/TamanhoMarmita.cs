@@ -21,9 +21,34 @@ namespace KFRestaurante.Dominio
 
         public TamanhoMarmita(string nome, decimal preco, int limitedecomponente)
         {
+            Validar(preco, limitedecomponente);
+
             this.Nome = nome;
             this.Preco = preco;
             this.LimitedeComponente = limitedecomponente;
+        }
+
+        // vale dali em diante: pedidos ja feitos guardam a foto do preco
+        public void Alterar(string nome, decimal preco, int limitedecomponente)
+        {
+            Validar(preco, limitedecomponente);
+
+            this.Nome = nome;
+            this.Preco = preco;
+            this.LimitedeComponente = limitedecomponente;
+        }
+
+        private static void Validar(decimal preco, int limitedecomponente)
+        {
+            if (preco < 0)
+            {
+                throw new DominioException($"O preço do tamanho não pode ser negativo. Valor recebido: {preco}.");
+            }
+
+            if (limitedecomponente < 0)
+            {
+                throw new DominioException($"O limite de componentes não pode ser negativo. Valor recebido: {limitedecomponente}.");
+            }
         }
 
         // substitui todos os limites de uma vez. Vale dali em diante: pedidos ja feitos guardam a foto
