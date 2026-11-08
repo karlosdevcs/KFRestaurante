@@ -83,7 +83,16 @@ namespace KFRestaurante.Endpoints
                 Restaurante restaurante = await contexto.Restaurantes.OrderBy(r => r.Id).FirstOrDefaultAsync() ?? new Restaurante();
 
                 // 3. o dominio monta o pedido e aplica as regras (DominioException vira 400 no ManipuladorDeExcecoes)
-                Pedido pedido = new Pedido(request.FormaDePagamento, request.TipoDeEntrega, request.Endereco, restaurante, cardapio);
+                Pedido pedido = new Pedido(
+                    request.NomeCliente,
+                    request.FormaDePagamento,
+                    request.TrocoPara,
+                    request.TipoDeEntrega,
+                    request.Endereco,
+                    request.Referencia,
+                    request.Observacao,
+                    restaurante,
+                    cardapio);
 
                 foreach (CriarItemDoPedidoRequest item in request.Itens)
                 {
@@ -102,6 +111,8 @@ namespace KFRestaurante.Endpoints
 
                     pedido.AdicionarItem(marmita, item.Quantidade);
                 }
+
+                pedido.Finalizar(); // confere o que depende do total (troco) depois de todos os itens
 
                 contexto.Add(pedido);
                 await contexto.SaveChangesAsync(); // o banco gera o Numero pela sequence e o EF le de volta

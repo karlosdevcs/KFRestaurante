@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -18,6 +19,12 @@ namespace KFRestaurante.Dominio
         public TipoDeEntrega TipoDeEntrega { get; private set; }
 
         public string? Endereco { get; private set; }
+
+        // tudo abaixo existe para a loja nao precisar perguntar nada no WhatsApp
+        public string NomeCliente { get; private set; } = null!;
+        public decimal? TrocoPara { get; private set; }     // so em dinheiro; null = nao precisa de troco
+        public string? Referencia { get; private set; }     // so em entrega: "portao azul, ao lado da padaria"
+        public string? Observacao { get; private set; }     // livre: "sem cebola"
 
         public CardapioDoDia CardapioDoDia { get; private set; } = null!;
 
@@ -75,10 +82,13 @@ namespace KFRestaurante.Dominio
         }
 
         // Numero nao vem de fora: o banco gera pela sequence pedidos_numero_seq no INSERT (ver KFContext)
-        public Pedido(FormadePagamento formadepagamento, TipoDeEntrega tipodeentrega, string? endereco, Restaurante restaurante, CardapioDoDia cardapio)
+        public Pedido(string nomeCliente, FormadePagamento formadepagamento, decimal? trocoPara, TipoDeEntrega tipodeentrega, string? endereco, string? referencia, string? observacao, Restaurante restaurante, CardapioDoDia cardapio)
 
         {
-
+            if (string.IsNullOrWhiteSpace(nomeCliente))
+            {
+                throw new DominioException("Informe o nome do cliente.");
+            }
 
             if (!restaurante.Aberto)
             {
@@ -97,13 +107,39 @@ namespace KFRestaurante.Dominio
             this.FormaDePagamento = formadepagamento;
             this.TipoDeEntrega = tipodeentrega;
             this.Endereco = tipodeentrega == TipoDeEntrega.Entrega ? endereco!.Trim() : null; // retirada nao guarda endereco
+            this.Referencia = tipodeentrega == TipoDeEntrega.Entrega ? TextoOuNulo(referencia) : null;
+            this.TrocoPara = formadepagamento == FormadePagamento.Dinheiro ? trocoPara : null; // pix/cartao nao tem troco
+            this.NomeCliente = nomeCliente.Trim();
+            this.Observacao = TextoOuNulo(observacao);
             this.CardapioDoDia = cardapio;
-           
+
+        }
+
+        // chamado depois de adicionar todos os itens: so ai da para conferir o que depende do total
+        public void Finalizar()
+        {
+            if (_itens.Count == 0)
+            {
+                throw new DominioException("O pedido precisa ter ao menos um item.");
+            }
+
+            decimal total = CalcularTotal();
+
+            if (TrocoPara != null && TrocoPara < total)
+            {
+                CultureInfo ptBr = CultureInfo.GetCultureInfo("pt-BR"); // R$ 65,00 mesmo se o servidor estiver em ingles
+                throw new DominioException($"Troco para R$ {TrocoPara.Value.ToString("N2", ptBr)} é menor que o total de R$ {total.ToString("N2", ptBr)}.");
+            }
         }
 
         public decimal CalcularTotal()
         {
             return _itens.Sum(ip => ip.Subtotal);
+        }
+
+        private static string? TextoOuNulo(string? texto)
+        {
+            return string.IsNullOrWhiteSpace(texto) ? null : texto.Trim();
         }
 
         private Pedido() { }

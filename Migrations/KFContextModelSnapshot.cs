@@ -182,15 +182,32 @@ namespace KFRestaurante.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("horapedido");
 
+                    b.Property<string>("NomeCliente")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("nomecliente");
+
                     b.Property<int>("Numero")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer")
                         .HasColumnName("numero")
                         .HasDefaultValueSql("nextval('pedidos_numero_seq')");
 
+                    b.Property<string>("Observacao")
+                        .HasColumnType("text")
+                        .HasColumnName("observacao");
+
+                    b.Property<string>("Referencia")
+                        .HasColumnType("text")
+                        .HasColumnName("referencia");
+
                     b.Property<int>("TipoDeEntrega")
                         .HasColumnType("integer")
                         .HasColumnName("tipodeentrega");
+
+                    b.Property<decimal?>("TrocoPara")
+                        .HasColumnType("numeric")
+                        .HasColumnName("trocopara");
 
                     b.HasKey("Id");
 
