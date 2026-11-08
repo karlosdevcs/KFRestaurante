@@ -7,6 +7,6 @@ using System.Threading.Tasks;
 
 namespace KFRestaurante.DTOs
 {
-    public record CriarOpcaoRequest(string Nome, Categoria Categoria, decimal Preco);
+    public record CriarOpcaoRequest(string Nome, Categoria Categoria, decimal? Preco);
     
 }

@@ -145,7 +145,7 @@ namespace KFRestaurante.Migrations
                         .HasColumnType("text")
                         .HasColumnName("nome");
 
-                    b.Property<decimal>("Preco")
+                    b.Property<decimal?>("Preco")
                         .HasColumnType("numeric")
                         .HasColumnName("preco");
 

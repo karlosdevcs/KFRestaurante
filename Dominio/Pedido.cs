@@ -60,6 +60,11 @@ namespace KFRestaurante.Dominio
                 {
                     throw new DominioException($"A opção {opcao.Nome} está esgotada.");
                 }
+
+                if (pedivel is Opcao semPreco && !semPreco.VendidaAvulsa)
+                {
+                    throw new DominioException($"{semPreco.Nome} não é vendido avulso, só como componente de marmita.");
+                }
             }
 
             ItemDoPedido item = new ItemDoPedido(pedivel, quantidade);

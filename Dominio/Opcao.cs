@@ -13,9 +13,16 @@ namespace KFRestaurante.Dominio
         public string Nome { get; private set; } = null!;
         public Categoria Categoria { get; private set; }
         public bool Esgotado { get; private set; }
-        public decimal Preco { get; private set; }
+        // null = nao e vendida avulsa, so entra como componente de marmita (la vale o preco do tamanho)
+        public decimal? Preco { get; private set; }
 
-        public Opcao(string nome, Categoria categoria, decimal preco = 0)
+        public bool VendidaAvulsa => Preco != null;
+
+        // trava de seguranca: o Pedido ja recusa opcao sem preco antes de chegar aqui.
+        // Se algum codigo esquecer essa checagem, estoura em vez de vender por R$ 0,00 em silencio.
+        decimal IPedivel.Preco => Preco ?? throw new InvalidOperationException($"A opção {Nome} não tem preço e não pode ser vendida avulsa.");
+
+        public Opcao(string nome, Categoria categoria, decimal? preco = null)
         {
             this.Nome = nome;
             this.Categoria = categoria;
@@ -23,7 +30,7 @@ namespace KFRestaurante.Dominio
         }
 
         // pedidos ja feitos nao mudam: o ItemDoPedido guarda a foto (nome e preco) do momento da compra
-        public void Alterar(string nome, Categoria categoria, decimal preco)
+        public void Alterar(string nome, Categoria categoria, decimal? preco)
         {
             this.Nome = nome;
             this.Categoria = categoria;

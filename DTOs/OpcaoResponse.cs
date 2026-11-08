@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace KFRestaurante.DTOs
 
 {
-    public record OpcaoResponse(int Id, string Nome, Categoria Categoria, decimal Preco, bool Esgotado)
+    public record OpcaoResponse(int Id, string Nome, Categoria Categoria, decimal? Preco, bool Esgotado)
     {
         public static OpcaoResponse De(Opcao opcao)
         {
