@@ -20,5 +20,26 @@ namespace KFRestaurante.Tests.Servicos
         {
             Assert.Equal(DateOnly.FromDateTime(HorarioBrasilia.Agora()), HorarioBrasilia.Hoje());
         }
+
+        [Fact]
+        public void Intervalo_do_dia_cobre_00h_a_23h59_em_brasilia()
+        {
+            // 08/11 00:00 em Brasilia (UTC-3) = 08/11 03:00 UTC; o dia termina onde comeca o proximo (09/11 03:00 UTC)
+            (DateTime inicioUtc, DateTime fimUtc) = HorarioBrasilia.IntervaloUtcDoDia(new DateOnly(2026, 11, 8));
+
+            Assert.Equal(new DateTime(2026, 11, 8, 3, 0, 0), inicioUtc);
+            Assert.Equal(new DateTime(2026, 11, 9, 3, 0, 0), fimUtc);
+        }
+
+        [Fact]
+        public void Pedido_de_23h30_em_brasilia_cai_no_intervalo_do_mesmo_dia()
+        {
+            // 08/11 23:30 em Brasilia = 09/11 02:30 UTC
+            DateTime horaPedidoUtc = new DateTime(2026, 11, 9, 2, 30, 0);
+
+            (DateTime inicioUtc, DateTime fimUtc) = HorarioBrasilia.IntervaloUtcDoDia(new DateOnly(2026, 11, 8));
+
+            Assert.InRange(horaPedidoUtc, inicioUtc, fimUtc.AddTicks(-1));
+        }
     }
 }

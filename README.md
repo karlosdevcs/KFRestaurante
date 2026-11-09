@@ -69,6 +69,8 @@ Projeto de estudo e portfólio: o foco está menos na quantidade de funcionalida
 | **Restaurante** | `GET /restaurante` · `POST /restaurante/abrir` · `POST /restaurante/fechar` | Estado global: fechado bloqueia pedidos |
 | | `PUT /restaurante/whatsapp` | Número da loja, para onde o pedido é enviado |
 | **Pedidos** | `POST /pedidos` · `GET /pedidos/{id}` | Cria / busca, com a mensagem e o link do WhatsApp |
+| | `GET /pedidos?data=&status=` | Painel da loja: pedidos de um dia (hoje por padrão), do mais recente ao mais antigo, com filtro opcional por status |
+| | `POST /pedidos/{id}/enviado` | O front chama quando o cliente toca em "Enviar no WhatsApp" |
 
 Exemplo de pedido com um item avulso e uma marmita:
 
@@ -212,4 +214,4 @@ Program.cs          só configuração e registro das rotas
 
 ## Testes
 
-91 testes de unidade cobrem o domínio e a mensagem do WhatsApp: o caminho feliz e cada regra que recusa (restaurante fechado, cardápio não publicado, opção esgotada, limite de componentes, porção dupla, preço congelado, troco menor que o total, entre outras), além do conteúdo exato da mensagem que a loja recebe. Eles não usam banco e rodam em menos de um segundo.
+104 testes de unidade cobrem o domínio e a mensagem do WhatsApp: o caminho feliz e cada regra que recusa (restaurante fechado, cardápio não publicado, opção esgotada, limite de componentes, porção dupla, preço congelado, troco menor que o total, entre outras), além do conteúdo exato da mensagem que a loja recebe. Eles não usam banco e rodam em menos de um segundo.

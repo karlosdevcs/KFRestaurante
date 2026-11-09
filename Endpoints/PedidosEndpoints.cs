@@ -1,6 +1,7 @@
 ﻿using KFRestaurante.Dominio;
 using KFRestaurante.DTOs;
 using KFRestaurante.Infraestrutura;
+using KFRestaurante.Servicos;
 using Microsoft.EntityFrameworkCore;
 
 namespace KFRestaurante.Endpoints
@@ -9,6 +10,32 @@ namespace KFRestaurante.Endpoints
     {
         public static void MapPedidos(this IEndpointRouteBuilder app)
         {
+            // painel da loja: lista os pedidos de um dia (hoje por padrao), do mais recente para o mais antigo
+            app.MapGet("/pedidos", async (DateOnly? data, StatusPedido? status, KFContext contexto) =>
+            {
+                DateOnly dia = data ?? HorarioBrasilia.Hoje();
+                (DateTime inicioUtc, DateTime fimUtc) = HorarioBrasilia.IntervaloUtcDoDia(dia);
+
+                IQueryable<Pedido> consulta = contexto.Pedidos
+                    .Include(p => p.Itens)
+                    .Where(p => p.HoraPedido >= inicioUtc && p.HoraPedido < fimUtc);
+
+                if (status != null)
+                {
+                    consulta = consulta.Where(p => p.Status == status);
+                }
+
+                // CalcularTotal() roda em memoria (soma uma lista privada); por isso materializa antes de projetar
+                List<Pedido> pedidos = await consulta
+                    .OrderByDescending(p => p.HoraPedido)
+                    .ToListAsync();
+
+                List<PedidoResumoResponse> resumos = pedidos.Select(p => PedidoResumoResponse.De(p)).ToList();
+
+                return Results.Ok(resumos);
+            })
+                .Produces<List<PedidoResumoResponse>>(StatusCodes.Status200OK);
+
             app.MapPost("/pedidos", async (CriarPedidoRequest request, KFContext contexto) =>
             {
                 // 1. formato do request (sem ir ao banco)

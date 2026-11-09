@@ -22,5 +22,18 @@ namespace KFRestaurante.Servicos
         {
             return TimeZoneInfo.ConvertTimeFromUtc(DateTime.SpecifyKind(utc, DateTimeKind.Utc), Fuso);
         }
+
+        // o intervalo em UTC que corresponde a um dia inteiro (00:00 a 23:59:59...) em Brasilia.
+        // Usado para filtrar no banco (que guarda em UTC) "pedidos feitos no dia X"
+        public static (DateTime InicioUtc, DateTime FimUtc) IntervaloUtcDoDia(DateOnly dia)
+        {
+            DateTime inicioLocal = dia.ToDateTime(TimeOnly.MinValue);
+            DateTime fimLocal = dia.AddDays(1).ToDateTime(TimeOnly.MinValue);
+
+            DateTime inicioUtc = TimeZoneInfo.ConvertTimeToUtc(DateTime.SpecifyKind(inicioLocal, DateTimeKind.Unspecified), Fuso);
+            DateTime fimUtc = TimeZoneInfo.ConvertTimeToUtc(DateTime.SpecifyKind(fimLocal, DateTimeKind.Unspecified), Fuso);
+
+            return (inicioUtc, fimUtc);
+        }
     }
 }
