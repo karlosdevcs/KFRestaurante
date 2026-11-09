@@ -83,6 +83,8 @@ A coluna **Acesso** diz o que a rota exige: **aberta** (cliente, sem login), **l
 | | `PUT /tamanhos/{id}/limites` | `GerenciarCadastros` | Define os limites por categoria (ex.: até 2 carnes) |
 | **Cardápio do dia** | `GET /cardapios/hoje` | aberta | **Ponto de entrada do cliente:** o cardápio de hoje, se já publicado |
 | | `POST /cardapios` · `GET /cardapios/{id}` | `GerenciarCardapio` | Cria o cardápio de hoje a partir de ids de opções / busca |
+| | `GET /cardapios/hoje/painel` | `GerenciarCardapio` | O cardápio de hoje em **qualquer** situação, inclusive rascunho (o `/cardapios/hoje` aberto esconde o rascunho do cliente) |
+| | `PUT /cardapios/{id}/opcoes` | `GerenciarCardapio` | **Substitui** as opções de um cardápio em **rascunho** (publicado ou fechado: 400) |
 | | `POST /cardapios/{id}/publicar` · `/fechar` | `GerenciarCardapio` | Abre / encerra as vendas (publicar de novo reabre) |
 | **Restaurante** | `GET /restaurante` | aberta | Estado global: fechado bloqueia pedidos |
 | | `POST /restaurante/abrir` · `/fechar` | `AbrirFecharLoja` | Abre / fecha a loja |

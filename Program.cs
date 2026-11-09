@@ -128,7 +128,27 @@ namespace KFRestaurante
             app.UseCors();
 
             app.UseExceptionHandler(); // toda excecao nao tratada passa pelo ManipuladorDeExcecoes
-            app.UseStatusCodePages();  // 401, 403 e 404 sem corpo tambem saem como ProblemDetails
+            // 401, 403 e 404 sem corpo tambem saem como ProblemDetails, agora com `detail` em portugues
+            // (o padrao do ASP.NET traz so o `title` em ingles) para o front mostrar direto
+            app.UseStatusCodePages(async contexto =>
+            {
+                HttpContext http = contexto.HttpContext;
+                int status = http.Response.StatusCode;
+
+                string? detalhe = status switch
+                {
+                    StatusCodes.Status401Unauthorized => "Você precisa entrar para continuar.",
+                    StatusCodes.Status403Forbidden => "Você não tem permissão para fazer isso.",
+                    StatusCodes.Status404NotFound => "O endereço pedido não existe.",
+                    _ => null
+                };
+
+                await http.RequestServices.GetRequiredService<IProblemDetailsService>().WriteAsync(new ProblemDetailsContext
+                {
+                    HttpContext = http,
+                    ProblemDetails = { Status = status, Detail = detalhe }
+                });
+            });
 
             app.UseAuthentication();
             app.UseAuthorization();

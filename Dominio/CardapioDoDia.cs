@@ -39,6 +39,30 @@ namespace KFRestaurante.Dominio
 		
 		}
 
+		// troca a lista inteira de opcoes. So vale em rascunho: depois de publicado o cliente ja viu o cardapio
+		public void SubstituirOpcoes(IEnumerable<Opcao> opcoes)
+		{
+			if (this.Situacao != SituacaoCardapio.Rascunho)
+			{
+				throw new DominioException($"Só é possível trocar as opções de um cardápio em rascunho. O cardápio de {DataPublicacao:dd/MM/yyyy} está {Situacao}.");
+			}
+
+			List<Opcao> novas = new List<Opcao>();
+
+			foreach (Opcao opcao in opcoes)
+			{
+				if (novas.Any(o => o.Nome == opcao.Nome))
+				{
+					throw new DominioException($"A opção {opcao.Nome} já está no cardápio de {DataPublicacao:dd/MM/yyyy}.");
+				}
+
+				novas.Add(opcao);
+			}
+
+			_opcoes.Clear();
+			_opcoes.AddRange(novas);
+		}
+
 		public void Publicar()
 		{
 			if (_opcoes.Count == 0)

@@ -81,6 +81,28 @@ namespace KFRestaurante.Endpoints
                 .Produces<CardapioResponse>(StatusCodes.Status200OK)
                 .ProducesProblem(StatusCodes.Status404NotFound);
 
+            // o painel precisa achar o cardapio de hoje em QUALQUER situacao, inclusive rascunho (que /cardapios/hoje esconde do cliente)
+            app.MapGet("/cardapios/hoje/painel", async (KFContext contexto) =>
+            {
+                DateOnly hoje = HorarioBrasilia.Hoje();
+
+                CardapioDoDia? cardapio = await contexto.CardapiosDoDia
+                    .Include(cardapio => cardapio.Opcoes)
+                    .FirstOrDefaultAsync(cardapio => cardapio.DataPublicacao == hoje);
+
+                if (cardapio == null)
+                {
+                    return Results.Problem(detail: $"Ainda não existe cardápio para {hoje:dd/MM/yyyy}.", statusCode: StatusCodes.Status404NotFound);
+                }
+
+                return Results.Ok(CardapioResponse.De(cardapio));
+            })
+                .Produces<CardapioResponse>(StatusCodes.Status200OK)
+                .ProducesProblem(StatusCodes.Status404NotFound)
+                .ProducesProblem(StatusCodes.Status401Unauthorized)
+                .ProducesProblem(StatusCodes.Status403Forbidden)
+                .RequireAuthorization(Politicas.De(Permissao.GerenciarCardapio));
+
             app.MapGet("/cardapios/{id:int}", async (int id, KFContext contexto) =>
             {
                 CardapioDoDia? cardapio = await contexto.CardapiosDoDia
@@ -95,6 +117,50 @@ namespace KFRestaurante.Endpoints
                 return Results.Ok(CardapioResponse.De(cardapio));
             })
                 .Produces<CardapioResponse>(StatusCodes.Status200OK)
+                .ProducesProblem(StatusCodes.Status404NotFound)
+                .ProducesProblem(StatusCodes.Status401Unauthorized)
+                .ProducesProblem(StatusCodes.Status403Forbidden)
+                .RequireAuthorization(Politicas.De(Permissao.GerenciarCardapio));
+
+            // troca as opcoes de um cardapio em rascunho (depois de publicado, o dominio recusa com 400)
+            app.MapPut("/cardapios/{id:int}/opcoes", async (int id, AlterarOpcoesDoCardapioRequest request, KFContext contexto) =>
+            {
+                List<int> idsRepetidos = request.OpcoesIds
+                    .GroupBy(opcaoId => opcaoId)
+                    .Where(grupo => grupo.Count() > 1)
+                    .Select(grupo => grupo.Key)
+                    .ToList();
+
+                if (idsRepetidos.Count > 0)
+                {
+                    return Results.Problem(detail: $"Ids enviados mais de uma vez: {string.Join(", ", idsRepetidos)}.", statusCode: StatusCodes.Status400BadRequest);
+                }
+
+                CardapioDoDia? cardapio = await contexto.CardapiosDoDia
+                    .Include(cardapio => cardapio.Opcoes)
+                    .FirstOrDefaultAsync(cardapio => cardapio.Id == id);
+
+                if (cardapio == null)
+                {
+                    return Results.Problem(detail: $"O cardápio com o id '{id}' não foi encontrado.", statusCode: StatusCodes.Status404NotFound);
+                }
+
+                List<Opcao> opcoes = await contexto.Opcoes.Where(opcao => request.OpcoesIds.Contains(opcao.Id)).ToListAsync();
+
+                List<int> idsInvalidos = request.OpcoesIds.Except(opcoes.Select(opcao => opcao.Id)).ToList();
+
+                if (idsInvalidos.Count > 0)
+                {
+                    return Results.Problem(detail: $"Ids de opções não encontrados: {string.Join(", ", idsInvalidos)}.", statusCode: StatusCodes.Status400BadRequest);
+                }
+
+                cardapio.SubstituirOpcoes(opcoes); // DominioException vira 400 (fora de rascunho, nome repetido)
+                await contexto.SaveChangesAsync();
+
+                return Results.Ok(CardapioResponse.De(cardapio));
+            })
+                .Produces<CardapioResponse>(StatusCodes.Status200OK)
+                .ProducesProblem(StatusCodes.Status400BadRequest)
                 .ProducesProblem(StatusCodes.Status404NotFound)
                 .ProducesProblem(StatusCodes.Status401Unauthorized)
                 .ProducesProblem(StatusCodes.Status403Forbidden)
