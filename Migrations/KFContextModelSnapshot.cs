@@ -280,6 +280,62 @@ namespace KFRestaurante.Migrations
                     b.ToTable("tamanhosmarmita");
                 });
 
+            modelBuilder.Entity("KFRestaurante.Dominio.Usuario", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("Ativo")
+                        .HasColumnType("boolean")
+                        .HasColumnName("ativo");
+
+                    b.Property<DateTime?>("BloqueadoAte")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("bloqueadoate");
+
+                    b.Property<DateTime>("CriadoEm")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("criadoem");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("email");
+
+                    b.Property<int>("FalhasDeLogin")
+                        .HasColumnType("integer")
+                        .HasColumnName("falhasdelogin");
+
+                    b.Property<string>("Nome")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("nome");
+
+                    b.Property<int>("Papel")
+                        .HasColumnType("integer")
+                        .HasColumnName("papel");
+
+                    b.Property<int>("Permissoes")
+                        .HasColumnType("integer")
+                        .HasColumnName("permissoes");
+
+                    b.Property<string>("SenhaHash")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("senhahash");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Email")
+                        .IsUnique();
+
+                    b.ToTable("usuarios");
+                });
+
             modelBuilder.Entity("MarmitaOpcao", b =>
                 {
                     b.Property<int>("MarmitaId")
