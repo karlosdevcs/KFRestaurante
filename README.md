@@ -20,23 +20,32 @@ Projeto de estudo e portfólio: o foco está menos na quantidade de funcionalida
    dotnet user-secrets set "ConnectionStrings:KFRestaurante" "Host=localhost;Port=5432;Database=kfrestaurante;Username=postgres;Password=SUA_SENHA"
    ```
 
-2. **Banco.** Cria o banco e aplica todas as migrations:
+2. **Segredos de autenticação.** A API **não sobe** sem a chave de assinatura do login (JWT). Gere um texto aleatório longo (32 caracteres ou mais) e guarde no user-secrets, junto com os dados do primeiro superuser, que é criado automaticamente na primeira execução:
+
+   ```bash
+   dotnet user-secrets set "Jwt:Chave" "<texto aleatório com 32+ caracteres>"
+   dotnet user-secrets set "Seed:Superuser:Nome" "Seu Nome"
+   dotnet user-secrets set "Seed:Superuser:Email" "voce@exemplo.com"
+   dotnet user-secrets set "Seed:Superuser:Senha" "uma senha com 8+ caracteres"
+   ```
+
+3. **Banco.** Cria o banco e aplica todas as migrations:
 
    ```bash
    dotnet ef database update
    ```
 
-3. **API.** O perfil `KFRestaurante` sobe em ambiente Development, que é onde o user-secrets é carregado:
+4. **API.** O perfil `KFRestaurante` sobe em ambiente Development, que é onde o user-secrets é carregado:
 
    ```bash
    dotnet run --launch-profile KFRestaurante
    ```
 
-   Swagger: http://localhost:5000/swagger
+   Swagger: http://localhost:5000/swagger. Para testar rotas protegidas por lá, faça `POST /auth/login`, copie o `token` da resposta e cole no botão **Authorize**.
 
    Se o front rodar em outro endereço, inclua-o em `Cors:OrigensPermitidas` no `appsettings.json`. Já vêm liberadas as portas mais comuns de desenvolvimento (5173, 3000 e 5500).
 
-4. **Testes:**
+5. **Testes:**
 
    ```bash
    dotnet test KFRestaurante.sln
@@ -44,33 +53,43 @@ Projeto de estudo e portfólio: o foco está menos na quantidade de funcionalida
 
 ### Fluxo mínimo para fazer um pedido
 
-1. `POST /opcoes` e `POST /tamanhos`: cadastra o que é vendido.
-2. `POST /cardapios` com os ids das opções e depois `POST /cardapios/{id}/publicar`.
-3. `PUT /restaurante/whatsapp` e `POST /restaurante/abrir`. O restaurante só abre com o WhatsApp cadastrado.
-4. `POST /pedidos`: a resposta traz `mensagemWhatsApp` e `linkWhatsApp`.
+1. `POST /auth/login` com o superuser criado no passo 2. Use o `token` devolvido no cabeçalho `Authorization: Bearer <token>` das próximas chamadas da loja.
+2. `POST /opcoes` e `POST /tamanhos`: cadastra o que é vendido.
+3. `POST /cardapios` com os ids das opções e depois `POST /cardapios/{id}/publicar`.
+4. `PUT /restaurante/whatsapp` e `POST /restaurante/abrir`. O restaurante só abre com o WhatsApp cadastrado.
+5. `POST /pedidos` (aberto, **sem login**: é o que o cliente usa): a resposta traz `mensagemWhatsApp` e `linkWhatsApp`.
 
 ---
 
 ## Endpoints
 
-| Recurso | Rota | O que faz |
-|---|---|---|
-| **Opções** | `GET /opcoes` · `GET /opcoes/{id}` | Lista / busca |
-| | `POST /opcoes` | Cadastra (nome, categoria, preço opcional) |
-| | `PUT /opcoes/{id}` | Edita nome, categoria e preço |
-| | `PATCH /opcoes/{id}/esgotado` | Marca ou desmarca como esgotada |
-| **Tamanhos** | `GET /tamanhos` · `GET /tamanhos/{id}` | Lista / busca, com os limites por categoria |
-| | `POST /tamanhos` · `PUT /tamanhos/{id}` | Cadastra / edita nome, preço e limite total de componentes |
-| | `PUT /tamanhos/{id}/limites` | Define os limites por categoria (ex.: até 2 carnes) |
-| **Cardápio do dia** | `GET /cardapios/hoje` | **Ponto de entrada do cliente:** o cardápio de hoje, se já publicado |
-| | `POST /cardapios` | Cria o cardápio de hoje a partir de ids de opções |
-| | `GET /cardapios/{id}` | Busca |
-| | `POST /cardapios/{id}/publicar` · `POST /cardapios/{id}/fechar` | Abre / encerra as vendas (publicar de novo reabre) |
-| **Restaurante** | `GET /restaurante` · `POST /restaurante/abrir` · `POST /restaurante/fechar` | Estado global: fechado bloqueia pedidos |
-| | `PUT /restaurante/whatsapp` | Número da loja, para onde o pedido é enviado |
-| **Pedidos** | `POST /pedidos` · `GET /pedidos/{id}` | Cria / busca, com a mensagem e o link do WhatsApp |
-| | `GET /pedidos?data=&status=` | Painel da loja: pedidos de um dia (hoje por padrão), do mais recente ao mais antigo, com filtro opcional por status |
-| | `POST /pedidos/{id}/enviado` | O front chama quando o cliente toca em "Enviar no WhatsApp" |
+A coluna **Acesso** diz o que a rota exige: **aberta** (cliente, sem login), **logado** (qualquer usuário ativo), **gerenciar usuários** (dono ou superuser) ou uma **permissão** específica (ver "Permissões" abaixo).
+
+| Recurso | Rota | Acesso | O que faz |
+|---|---|---|---|
+| **Login** | `POST /auth/login` | aberta | E-mail e senha; devolve o token e o usuário |
+| | `GET /auth/eu` | logado | Quem sou eu e o que posso fazer |
+| | `POST /auth/trocar-senha` | logado | A pessoa troca a própria senha |
+| **Usuários** | `GET /usuarios` · `GET /usuarios/{id}` | gerenciar usuários | Lista quem você gerencia (e você mesmo) |
+| | `POST /usuarios` | gerenciar usuários | Cria usuário; papel e permissões limitados pela hierarquia |
+| | `PUT /usuarios/{id}` | gerenciar usuários | Edita nome e **substitui** as permissões |
+| | `POST /usuarios/{id}/desativar` · `/ativar` | gerenciar usuários | Corta / devolve o acesso na hora |
+| | `PUT /usuarios/{id}/senha` | gerenciar usuários | Redefine a senha de quem você gerencia |
+| **Opções** | `GET /opcoes` · `GET /opcoes/{id}` | logado | Lista / busca |
+| | `POST /opcoes` · `PUT /opcoes/{id}` | `GerenciarCadastros` | Cadastra / edita nome, categoria e preço opcional |
+| | `PATCH /opcoes/{id}/esgotado` | `EsgotarOpcoes` | Marca ou desmarca como esgotada |
+| **Tamanhos** | `GET /tamanhos` · `GET /tamanhos/{id}` | aberta | Lista / busca, com os limites por categoria |
+| | `POST /tamanhos` · `PUT /tamanhos/{id}` | `GerenciarCadastros` | Cadastra / edita nome, preço e limite total de componentes |
+| | `PUT /tamanhos/{id}/limites` | `GerenciarCadastros` | Define os limites por categoria (ex.: até 2 carnes) |
+| **Cardápio do dia** | `GET /cardapios/hoje` | aberta | **Ponto de entrada do cliente:** o cardápio de hoje, se já publicado |
+| | `POST /cardapios` · `GET /cardapios/{id}` | `GerenciarCardapio` | Cria o cardápio de hoje a partir de ids de opções / busca |
+| | `POST /cardapios/{id}/publicar` · `/fechar` | `GerenciarCardapio` | Abre / encerra as vendas (publicar de novo reabre) |
+| **Restaurante** | `GET /restaurante` | aberta | Estado global: fechado bloqueia pedidos |
+| | `POST /restaurante/abrir` · `/fechar` | `AbrirFecharLoja` | Abre / fecha a loja |
+| | `PUT /restaurante/whatsapp` | `AlterarWhatsApp` | Número da loja, para onde o pedido é enviado |
+| **Pedidos** | `POST /pedidos` | aberta | Cria, com a mensagem e o link do WhatsApp na resposta |
+| | `POST /pedidos/{id}/enviado` | aberta | O front chama quando o cliente toca em "Enviar no WhatsApp" |
+| | `GET /pedidos?data=&status=` · `GET /pedidos/{id}` | `VerPedidos` | Painel da loja: pedidos de um dia (hoje por padrão), do mais recente ao mais antigo / busca |
 
 Exemplo de pedido com um item avulso e uma marmita:
 
@@ -78,6 +97,7 @@ Exemplo de pedido com um item avulso e uma marmita:
 POST /pedidos
 {
   "nomeCliente": "Maria",
+  "telefone": "(31) 98888-7777",
   "cardapioId": 3,
   "formaDePagamento": "Dinheiro",
   "trocoPara": 100,
@@ -97,7 +117,7 @@ A mensagem que chega à loja (campo `mensagemWhatsApp` da resposta):
 ```
 *Pedido nº 14*
 08/11/2026 às 20:00
-Cliente: Maria
+Cliente: Maria · (31) 98888-7777
 
 1x Feijoada — R$ 25,00
 2x Marmita M — R$ 40,00
@@ -187,6 +207,18 @@ As chaves estrangeiras usam `Restrict` onde apagar levaria junto dados que impor
 - **Idempotência:** publicar um cardápio já publicado, fechar o que já está fechado ou abrir o restaurante já aberto não dá erro. Se a rede falhar e o app reenviar, o dono não vê "falhou" sobre algo que funcionou.
 - **Migrations revisadas à mão:** cada migration foi lida antes de aplicar. Numa delas, o `Down` gerado pelo EF apagava a sequence antes do default que dependia dela, e o rollback falharia. Em outras, foram acrescentados passos de dados (por exemplo, converter preço `0` em "sem preço" e voltar no rollback).
 
+### Login e permissões por usuário
+
+O cliente não faz login: o link do cardápio é aberto. A área da loja exige login, e **a proteção está na API**, não na tela: esconder um botão no front não impede ninguém de chamar o endpoint.
+
+- **Papéis só definem hierarquia** (`Superuser` > `Dono` > `Funcionario`): quem pode criar e gerenciar quem. O superuser cria qualquer papel, o dono cria só funcionários, e ninguém se gerencia por esse caminho.
+- **O que cada um pode fazer vem de permissões que se ligam e desligam por usuário** (`VerPedidos`, `EsgotarOpcoes`, `AbrirFecharLoja`, `GerenciarCardapio`, `GerenciarCadastros`, `AlterarWhatsApp`). O dono escolhe quais ligar para cada funcionário, e o superuser faz o mesmo com os donos. **Ninguém concede uma permissão que não tem.** O superuser sempre tem todas. As permissões são um único inteiro por usuário, um bit cada, e os valores nunca são renumerados.
+- **Permissões são lidas do banco a cada requisição**, não de dentro do token (que carrega só o id do usuário). Desativar alguém ou revogar uma permissão vale na hora, sem esperar o token vencer.
+- **Entidade `Usuario` própria**, sem herdar de `IdentityUser`: o domínio não se curva ao framework. O hash da senha usa o `PasswordHasher` do ASP.NET Core (PBKDF2 com sal), então não há criptografia escrita à mão.
+- **Defesas no login:** a mesma mensagem para e-mail inexistente, senha errada, conta inativa ou bloqueada (não revela quais e-mails existem); o tempo de resposta é o mesmo nesses casos; 5 erros bloqueiam a conta por 15 minutos; senha mínima de 8 caracteres.
+- **Teste de segurança de rotas:** um teste sobe a API e confere a tabela completa de rotas. Se um endpoint novo ficar sem classificação, ou perder a proteção, ou trocar a permissão exigida, o teste falha.
+- **O primeiro superuser não vem de um cadastro público:** é criado na inicialização a partir do user-secrets. A API também se recusa a subir sem a chave do JWT configurada.
+
 ### DTOs sem AutoMapper
 
 Requests e responses são `record` posicionais em `DTOs/`. A conversão é explícita, por um método estático `De` no próprio response (`OpcaoResponse.De(opcao)`). É fácil de ler, sem mágica e sem expor a entidade na API.
@@ -195,7 +227,9 @@ Requests e responses são `record` posicionais em `DTOs/`. A conversão é expl�
 
 ## Limitações conhecidas
 
-- **A área da loja não tem autenticação.** Os endpoints do dono (cadastrar opções, publicar cardápio, abrir o restaurante, alterar o WhatsApp) estão abertos, como os do cliente. É uma escolha consciente para o escopo de portfólio. Antes de uso real, esses endpoints precisam de login, e o primeiro passo seria separá-los num grupo de rotas protegido.
+- **Autenticação sem refresh token e sem limite de tentativas por IP.** O token dura 12 horas e depois é preciso entrar de novo. O bloqueio por tentativas é por **conta** (5 erros bloqueiam por 15 minutos), não por origem. Antes de expor a API na internet, vale somar um limitador de requisições (rate limiting) no login e servir tudo por HTTPS, porque o token viaja no cabeçalho.
+- **Um superuser pode ser criado só pela configuração local**, nunca pela API. Se todos os superusers forem desativados, é preciso criar outro via `Seed:Superuser:*` com um e-mail novo.
+- **Revogar uma permissão do dono não recolhe, em cascata, o que ele já concedeu aos funcionários.** A regra "ninguém concede o que não tem" vale na hora de conceder.
 - **O sistema não confirma o envio pelo WhatsApp.** O link abre a conversa com a mensagem pronta, mas quem aperta "enviar" é o cliente. Por isso o relatório conta pedidos *gerados*.
 - **Não há endpoints de exclusão.** Opções, tamanhos e cardápios só são criados e editados. As chaves estrangeiras já estão preparadas (`Restrict`) para quando a exclusão existir.
 
@@ -214,4 +248,4 @@ Program.cs          só configuração e registro das rotas
 
 ## Testes
 
-104 testes de unidade cobrem o domínio e a mensagem do WhatsApp: o caminho feliz e cada regra que recusa (restaurante fechado, cardápio não publicado, opção esgotada, limite de componentes, porção dupla, preço congelado, troco menor que o total, entre outras), além do conteúdo exato da mensagem que a loja recebe. Eles não usam banco e rodam em menos de um segundo.
+152 testes de unidade e de segurança cobrem o domínio, a mensagem do WhatsApp e a proteção das rotas: o caminho feliz e cada regra que recusa (restaurante fechado, cardápio não publicado, opção esgotada, limite de componentes, porção dupla, preço congelado, troco menor que o total, entre outras), além do conteúdo exato da mensagem que a loja recebe. Eles não usam banco e rodam em menos de um segundo.
