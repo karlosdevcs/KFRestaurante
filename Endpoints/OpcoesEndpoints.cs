@@ -1,6 +1,7 @@
 ﻿using KFRestaurante.Dominio;
 using KFRestaurante.DTOs;
 using KFRestaurante.Infraestrutura;
+using KFRestaurante.Infraestrutura.Autenticacao;
 using Microsoft.EntityFrameworkCore;
 
 namespace KFRestaurante.Endpoints
@@ -15,7 +16,9 @@ namespace KFRestaurante.Endpoints
 
 
             })
-                .Produces<List<OpcaoResponse>>(StatusCodes.Status200OK);
+                .Produces<List<OpcaoResponse>>(StatusCodes.Status200OK)
+                .ProducesProblem(StatusCodes.Status401Unauthorized)
+                .RequireAuthorization(Politicas.Autenticado);
 
 
 
@@ -39,7 +42,10 @@ namespace KFRestaurante.Endpoints
             })
                 .Produces<OpcaoResponse>(StatusCodes.Status201Created)
                 .ProducesProblem(StatusCodes.Status400BadRequest)
-                .ProducesProblem(StatusCodes.Status409Conflict);
+                .ProducesProblem(StatusCodes.Status409Conflict)
+                .ProducesProblem(StatusCodes.Status401Unauthorized)
+                .ProducesProblem(StatusCodes.Status403Forbidden)
+                .RequireAuthorization(Politicas.De(Permissao.GerenciarCadastros));
 
             app.MapGet("/opcoes/{id:int}", async (int id, KFContext contexto) =>
             {
@@ -56,7 +62,9 @@ namespace KFRestaurante.Endpoints
 
             })
                 .Produces<OpcaoResponse>(StatusCodes.Status200OK)
-                .ProducesProblem(StatusCodes.Status404NotFound);
+                .ProducesProblem(StatusCodes.Status404NotFound)
+                .ProducesProblem(StatusCodes.Status401Unauthorized)
+                .RequireAuthorization(Politicas.Autenticado);
 
             app.MapPut("/opcoes/{id:int}", async (int id, AlterarOpcaoRequest request, KFContext contexto) =>
             {
@@ -81,7 +89,10 @@ namespace KFRestaurante.Endpoints
                 .Produces<OpcaoResponse>(StatusCodes.Status200OK)
                 .ProducesProblem(StatusCodes.Status400BadRequest)
                 .ProducesProblem(StatusCodes.Status404NotFound)
-                .ProducesProblem(StatusCodes.Status409Conflict);
+                .ProducesProblem(StatusCodes.Status409Conflict)
+                .ProducesProblem(StatusCodes.Status401Unauthorized)
+                .ProducesProblem(StatusCodes.Status403Forbidden)
+                .RequireAuthorization(Politicas.De(Permissao.GerenciarCadastros));
 
             app.MapPatch("/opcoes/{id:int}/esgotado", async (int id, AlterarEsgotadoRequest request, KFContext contexto) =>
             {
@@ -99,7 +110,10 @@ namespace KFRestaurante.Endpoints
             })
                 .Produces<OpcaoResponse>(StatusCodes.Status200OK)
                 .ProducesProblem(StatusCodes.Status400BadRequest)
-                .ProducesProblem(StatusCodes.Status404NotFound);
+                .ProducesProblem(StatusCodes.Status404NotFound)
+                .ProducesProblem(StatusCodes.Status401Unauthorized)
+                .ProducesProblem(StatusCodes.Status403Forbidden)
+                .RequireAuthorization(Politicas.De(Permissao.EsgotarOpcoes));
         }
     }
 }

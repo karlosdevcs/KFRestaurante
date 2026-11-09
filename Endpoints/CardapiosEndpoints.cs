@@ -1,6 +1,7 @@
 ﻿using KFRestaurante.Dominio;
 using KFRestaurante.DTOs;
 using KFRestaurante.Infraestrutura;
+using KFRestaurante.Infraestrutura.Autenticacao;
 using KFRestaurante.Servicos;
 using Microsoft.EntityFrameworkCore;
 
@@ -53,7 +54,10 @@ namespace KFRestaurante.Endpoints
             })
                 .Produces<CardapioResponse>(StatusCodes.Status201Created)
                 .ProducesProblem(StatusCodes.Status400BadRequest)
-                .ProducesProblem(StatusCodes.Status409Conflict);
+                .ProducesProblem(StatusCodes.Status409Conflict)
+                .ProducesProblem(StatusCodes.Status401Unauthorized)
+                .ProducesProblem(StatusCodes.Status403Forbidden)
+                .RequireAuthorization(Politicas.De(Permissao.GerenciarCardapio));
 
             // a tela do cliente comeca aqui: ele nao sabe o id, so que quer o cardapio de hoje.
             // Rota literal "hoje" tem prioridade sobre "{id}" no roteamento do ASP.NET
@@ -91,7 +95,10 @@ namespace KFRestaurante.Endpoints
                 return Results.Ok(CardapioResponse.De(cardapio));
             })
                 .Produces<CardapioResponse>(StatusCodes.Status200OK)
-                .ProducesProblem(StatusCodes.Status404NotFound);
+                .ProducesProblem(StatusCodes.Status404NotFound)
+                .ProducesProblem(StatusCodes.Status401Unauthorized)
+                .ProducesProblem(StatusCodes.Status403Forbidden)
+                .RequireAuthorization(Politicas.De(Permissao.GerenciarCardapio));
 
             app.MapPost("/cardapios/{id:int}/publicar", async (int id, KFContext contexto) =>
             {
@@ -111,7 +118,10 @@ namespace KFRestaurante.Endpoints
             })
                 .Produces<CardapioResponse>(StatusCodes.Status200OK)
                 .ProducesProblem(StatusCodes.Status400BadRequest)
-                .ProducesProblem(StatusCodes.Status404NotFound);
+                .ProducesProblem(StatusCodes.Status404NotFound)
+                .ProducesProblem(StatusCodes.Status401Unauthorized)
+                .ProducesProblem(StatusCodes.Status403Forbidden)
+                .RequireAuthorization(Politicas.De(Permissao.GerenciarCardapio));
 
             app.MapPost("/cardapios/{id:int}/fechar", async (int id, KFContext contexto) =>
             {
@@ -131,7 +141,10 @@ namespace KFRestaurante.Endpoints
             })
                 .Produces<CardapioResponse>(StatusCodes.Status200OK)
                 .ProducesProblem(StatusCodes.Status400BadRequest)
-                .ProducesProblem(StatusCodes.Status404NotFound);
+                .ProducesProblem(StatusCodes.Status404NotFound)
+                .ProducesProblem(StatusCodes.Status401Unauthorized)
+                .ProducesProblem(StatusCodes.Status403Forbidden)
+                .RequireAuthorization(Politicas.De(Permissao.GerenciarCardapio));
         }
     }
 }

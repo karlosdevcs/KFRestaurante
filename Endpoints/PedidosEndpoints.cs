@@ -1,6 +1,7 @@
 ﻿using KFRestaurante.Dominio;
 using KFRestaurante.DTOs;
 using KFRestaurante.Infraestrutura;
+using KFRestaurante.Infraestrutura.Autenticacao;
 using KFRestaurante.Servicos;
 using Microsoft.EntityFrameworkCore;
 
@@ -34,7 +35,10 @@ namespace KFRestaurante.Endpoints
 
                 return Results.Ok(resumos);
             })
-                .Produces<List<PedidoResumoResponse>>(StatusCodes.Status200OK);
+                .Produces<List<PedidoResumoResponse>>(StatusCodes.Status200OK)
+                .ProducesProblem(StatusCodes.Status401Unauthorized)
+                .ProducesProblem(StatusCodes.Status403Forbidden)
+                .RequireAuthorization(Politicas.De(Permissao.VerPedidos));
 
             app.MapPost("/pedidos", async (CriarPedidoRequest request, KFContext contexto) =>
             {
@@ -169,7 +173,10 @@ namespace KFRestaurante.Endpoints
                 return Results.Ok(PedidoResponse.De(pedido, whatsAppDaLoja));
             })
                 .Produces<PedidoResponse>(StatusCodes.Status200OK)
-                .ProducesProblem(StatusCodes.Status404NotFound);
+                .ProducesProblem(StatusCodes.Status404NotFound)
+                .ProducesProblem(StatusCodes.Status401Unauthorized)
+                .ProducesProblem(StatusCodes.Status403Forbidden)
+                .RequireAuthorization(Politicas.De(Permissao.VerPedidos));
 
             // chamado pelo front quando o cliente toca em "Enviar no WhatsApp"
             app.MapPost("/pedidos/{id:int}/enviado", async (int id, KFContext contexto) =>

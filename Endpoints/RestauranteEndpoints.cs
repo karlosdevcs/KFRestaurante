@@ -1,6 +1,7 @@
 ﻿using KFRestaurante.Dominio;
 using KFRestaurante.DTOs;
 using KFRestaurante.Infraestrutura;
+using KFRestaurante.Infraestrutura.Autenticacao;
 using Microsoft.EntityFrameworkCore;
 
 namespace KFRestaurante.Endpoints
@@ -38,7 +39,10 @@ namespace KFRestaurante.Endpoints
                 return Results.Ok(RestauranteResponse.De(restaurante));
             })
                 .Produces<RestauranteResponse>(StatusCodes.Status200OK)
-                .ProducesProblem(StatusCodes.Status400BadRequest);
+                .ProducesProblem(StatusCodes.Status400BadRequest)
+                .ProducesProblem(StatusCodes.Status401Unauthorized)
+                .ProducesProblem(StatusCodes.Status403Forbidden)
+                .RequireAuthorization(Politicas.De(Permissao.AbrirFecharLoja));
 
             app.MapPost("/restaurante/fechar", async (KFContext contexto) =>
             {
@@ -55,7 +59,10 @@ namespace KFRestaurante.Endpoints
 
                 return Results.Ok(RestauranteResponse.De(restaurante));
             })
-                .Produces<RestauranteResponse>(StatusCodes.Status200OK);
+                .Produces<RestauranteResponse>(StatusCodes.Status200OK)
+                .ProducesProblem(StatusCodes.Status401Unauthorized)
+                .ProducesProblem(StatusCodes.Status403Forbidden)
+                .RequireAuthorization(Politicas.De(Permissao.AbrirFecharLoja));
 
             app.MapPut("/restaurante/whatsapp", async (AlterarWhatsAppRequest request, KFContext contexto) =>
             {
@@ -73,7 +80,10 @@ namespace KFRestaurante.Endpoints
                 return Results.Ok(RestauranteResponse.De(restaurante));
             })
                 .Produces<RestauranteResponse>(StatusCodes.Status200OK)
-                .ProducesProblem(StatusCodes.Status400BadRequest);
+                .ProducesProblem(StatusCodes.Status400BadRequest)
+                .ProducesProblem(StatusCodes.Status401Unauthorized)
+                .ProducesProblem(StatusCodes.Status403Forbidden)
+                .RequireAuthorization(Politicas.De(Permissao.AlterarWhatsApp));
         }
     }
 }

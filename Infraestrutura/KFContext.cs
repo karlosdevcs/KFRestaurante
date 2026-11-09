@@ -20,6 +20,8 @@ namespace KFRestaurante.Infraestrutura
 
         public DbSet<Restaurante> Restaurantes { get; set; }
 
+        public DbSet<Usuario> Usuarios { get; set; }
+
         public KFContext(DbContextOptions<KFContext> options) : base(options)
         {
 
@@ -44,6 +46,11 @@ namespace KFRestaurante.Infraestrutura
 
             modelBuilder.Entity<TamanhoMarmita>()
                 .HasIndex(t => t.Nome)
+                .IsUnique();
+
+            // o e-mail e o login: unico no banco (o dominio ja grava em minusculo)
+            modelBuilder.Entity<Usuario>()
+                .HasIndex(u => u.Email)
                 .IsUnique();
 
             // limites por categoria: tabela propria, mas sempre carregada e salva junto com o tamanho

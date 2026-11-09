@@ -1,6 +1,7 @@
 ﻿using KFRestaurante.Dominio;
 using KFRestaurante.DTOs;
 using KFRestaurante.Infraestrutura;
+using KFRestaurante.Infraestrutura.Autenticacao;
 using Microsoft.EntityFrameworkCore;
 
 namespace KFRestaurante.Endpoints
@@ -42,7 +43,10 @@ namespace KFRestaurante.Endpoints
             })
                 .Produces<TamanhoResponse>(StatusCodes.Status201Created)
                 .ProducesProblem(StatusCodes.Status400BadRequest)
-                .ProducesProblem(StatusCodes.Status409Conflict);
+                .ProducesProblem(StatusCodes.Status409Conflict)
+                .ProducesProblem(StatusCodes.Status401Unauthorized)
+                .ProducesProblem(StatusCodes.Status403Forbidden)
+                .RequireAuthorization(Politicas.De(Permissao.GerenciarCadastros));
 
             app.MapPut("/tamanhos/{id:int}", async (int id, AlterarTamanhoRequest request, KFContext contexto) =>
             {
@@ -67,7 +71,10 @@ namespace KFRestaurante.Endpoints
                 .Produces<TamanhoResponse>(StatusCodes.Status200OK)
                 .ProducesProblem(StatusCodes.Status400BadRequest)
                 .ProducesProblem(StatusCodes.Status404NotFound)
-                .ProducesProblem(StatusCodes.Status409Conflict);
+                .ProducesProblem(StatusCodes.Status409Conflict)
+                .ProducesProblem(StatusCodes.Status401Unauthorized)
+                .ProducesProblem(StatusCodes.Status403Forbidden)
+                .RequireAuthorization(Politicas.De(Permissao.GerenciarCadastros));
 
             app.MapPut("/tamanhos/{id:int}/limites", async (int id, AlterarLimitesRequest request, KFContext contexto) =>
             {
@@ -91,7 +98,10 @@ namespace KFRestaurante.Endpoints
             })
                 .Produces<TamanhoResponse>(StatusCodes.Status200OK)
                 .ProducesProblem(StatusCodes.Status400BadRequest)
-                .ProducesProblem(StatusCodes.Status404NotFound);
+                .ProducesProblem(StatusCodes.Status404NotFound)
+                .ProducesProblem(StatusCodes.Status401Unauthorized)
+                .ProducesProblem(StatusCodes.Status403Forbidden)
+                .RequireAuthorization(Politicas.De(Permissao.GerenciarCadastros));
         }
     }
 }
