@@ -333,6 +333,37 @@ namespace KFRestaurante.Tests.Dominio
             Assert.Contains("ao menos um item", erro.Message);
         }
 
+        // ---------- status ----------
+
+        [Fact]
+        public void Nasce_como_gerado()
+        {
+            Pedido pedido = NovoPedido();
+
+            Assert.Equal(StatusPedido.Gerado, pedido.Status);
+        }
+
+        [Fact]
+        public void MarcarComoEnviado_muda_o_status()
+        {
+            Pedido pedido = NovoPedido();
+
+            pedido.MarcarComoEnviado();
+
+            Assert.Equal(StatusPedido.Enviado, pedido.Status);
+        }
+
+        [Fact]
+        public void MarcarComoEnviado_e_idempotente()
+        {
+            Pedido pedido = NovoPedido();
+
+            pedido.MarcarComoEnviado();
+            pedido.MarcarComoEnviado();
+
+            Assert.Equal(StatusPedido.Enviado, pedido.Status);
+        }
+
         // ---------- telefone ----------
 
         private Pedido PedidoComTelefone(string telefone)

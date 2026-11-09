@@ -143,6 +143,24 @@ namespace KFRestaurante.Endpoints
             })
                 .Produces<PedidoResponse>(StatusCodes.Status200OK)
                 .ProducesProblem(StatusCodes.Status404NotFound);
+
+            // chamado pelo front quando o cliente toca em "Enviar no WhatsApp"
+            app.MapPost("/pedidos/{id:int}/enviado", async (int id, KFContext contexto) =>
+            {
+                Pedido? pedido = await contexto.Pedidos.FindAsync(id);
+
+                if (pedido == null)
+                {
+                    return Results.Problem(detail: $"O pedido com o id '{id}' não foi encontrado.", statusCode: StatusCodes.Status404NotFound);
+                }
+
+                pedido.MarcarComoEnviado();
+                await contexto.SaveChangesAsync();
+
+                return Results.NoContent();
+            })
+                .Produces(StatusCodes.Status204NoContent)
+                .ProducesProblem(StatusCodes.Status404NotFound);
         }
     }
 }

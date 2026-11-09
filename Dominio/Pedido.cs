@@ -20,6 +20,8 @@ namespace KFRestaurante.Dominio
 
         public string? Endereco { get; private set; }
 
+        public StatusPedido Status { get; private set; }
+
         // tudo abaixo existe para a loja nao precisar perguntar nada no WhatsApp
         public string NomeCliente { get; private set; } = null!;
         public string Telefone { get; private set; } = null!;  // so digitos, com DDD: 31999999999
@@ -113,6 +115,7 @@ namespace KFRestaurante.Dominio
             }
 
             this.HoraPedido = DateTime.UtcNow; // UTC: o Postgres (timestamptz) nao aceita hora local
+            this.Status = StatusPedido.Gerado; // todo pedido nasce assim
             this.FormaDePagamento = formadepagamento;
             this.TipoDeEntrega = tipodeentrega;
             this.Endereco = tipodeentrega == TipoDeEntrega.Entrega ? endereco!.Trim() : null; // retirada nao guarda endereco
@@ -140,6 +143,12 @@ namespace KFRestaurante.Dominio
                 CultureInfo ptBr = CultureInfo.GetCultureInfo("pt-BR"); // R$ 65,00 mesmo se o servidor estiver em ingles
                 throw new DominioException($"Troco para R$ {TrocoPara.Value.ToString("N2", ptBr)} é menor que o total de R$ {total.ToString("N2", ptBr)}.");
             }
+        }
+
+        // chamado pelo front quando o cliente toca em "Enviar no WhatsApp"
+        public void MarcarComoEnviado()
+        {
+            this.Status = StatusPedido.Enviado; // ja enviado: continua enviado, sem erro (idempotente)
         }
 
         public decimal CalcularTotal()
