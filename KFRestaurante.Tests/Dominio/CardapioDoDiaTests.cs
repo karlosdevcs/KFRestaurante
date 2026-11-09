@@ -38,17 +38,62 @@ namespace KFRestaurante.Tests.Dominio
         }
 
         [Fact]
-        public void Recusa_substituir_opcoes_de_cardapio_publicado_ou_fechado()
+        public void Cardapio_publicado_aceita_opcoes_novas_e_mantem_as_que_ja_tinha()
         {
             CardapioDoDia cardapio = new CardapioDoDia(Hoje);
             cardapio.AdicionarOpcao(new Opcao("Arroz", Categoria.Acompanhamento));
             cardapio.Publicar();
 
-            Assert.Throws<DominioException>(() => cardapio.SubstituirOpcoes(new[] { new Opcao("Bife", Categoria.Carne) }));
+            cardapio.SubstituirOpcoes(new[] { new Opcao("Arroz", Categoria.Acompanhamento), new Opcao("Carne de churrasco", Categoria.Carne, 12.90m) });
 
+            Assert.Equal(SituacaoCardapio.Publicado, cardapio.Situacao);
+            Assert.Equal(new[] { "Arroz", "Carne de churrasco" }, cardapio.Opcoes.Select(o => o.Nome).ToArray());
+        }
+
+        [Fact]
+        public void Cardapio_publicado_recusa_tirar_opcao_e_mantem_a_lista()
+        {
+            CardapioDoDia cardapio = new CardapioDoDia(Hoje);
+            cardapio.AdicionarOpcao(new Opcao("Arroz", Categoria.Acompanhamento));
+            cardapio.AdicionarOpcao(new Opcao("Bife", Categoria.Carne));
+            cardapio.Publicar();
+
+            DominioException erro = Assert.Throws<DominioException>(() => cardapio.SubstituirOpcoes(new[] { new Opcao("Arroz", Categoria.Acompanhamento) }));
+
+            Assert.Contains("Bife", erro.Message);
+            Assert.Contains("esgotado", erro.Message);
+            Assert.Equal(2, cardapio.Opcoes.Count());
+        }
+
+        [Fact]
+        public void Cardapio_fechado_recusa_mudar_as_opcoes()
+        {
+            CardapioDoDia cardapio = new CardapioDoDia(Hoje);
+            cardapio.AdicionarOpcao(new Opcao("Arroz", Categoria.Acompanhamento));
+            cardapio.Publicar();
             cardapio.Fechar();
-            Assert.Throws<DominioException>(() => cardapio.SubstituirOpcoes(new[] { new Opcao("Bife", Categoria.Carne) }));
-            Assert.Equal("Arroz", cardapio.Opcoes.Single().Nome); // nada mudou
+
+            Assert.Throws<DominioException>(() => cardapio.SubstituirOpcoes(new[] { new Opcao("Arroz", Categoria.Acompanhamento), new Opcao("Bife", Categoria.Carne) }));
+
+            Assert.Equal("Arroz", cardapio.Opcoes.Single().Nome);
+        }
+
+        [Fact]
+        public void Registra_quando_as_opcoes_mudaram_pela_ultima_vez()
+        {
+            DateTime antes = DateTime.UtcNow;
+            CardapioDoDia cardapio = new CardapioDoDia(Hoje);
+            Assert.InRange(cardapio.AtualizadoEm, antes, DateTime.UtcNow);
+
+            cardapio.AdicionarOpcao(new Opcao("Arroz", Categoria.Acompanhamento));
+            cardapio.Publicar();
+            DateTime depoisDePublicar = cardapio.AtualizadoEm;
+            Assert.InRange(depoisDePublicar, antes, DateTime.UtcNow); // publicar nao mexe nas opcoes
+
+            DateTime antesDaInclusao = DateTime.UtcNow;
+            cardapio.SubstituirOpcoes(new[] { new Opcao("Arroz", Categoria.Acompanhamento), new Opcao("Bife", Categoria.Carne) });
+
+            Assert.InRange(cardapio.AtualizadoEm, antesDaInclusao, DateTime.UtcNow);
         }
 
         [Fact]

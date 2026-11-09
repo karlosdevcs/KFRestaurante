@@ -50,6 +50,10 @@ namespace KFRestaurante.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<DateTime>("AtualizadoEm")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("atualizadoem");
+
                     b.Property<DateOnly>("DataPublicacao")
                         .HasColumnType("date")
                         .HasColumnName("datapublicacao");

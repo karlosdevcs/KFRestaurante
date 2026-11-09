@@ -14,6 +14,9 @@ namespace KFRestaurante.Dominio
         public DateOnly DataPublicacao { get; private set; }
 		public SituacaoCardapio Situacao { get; private set; }
 
+		// UTC. Quando as OPCOES do cardapio mudaram pela ultima vez (criacao, inclusao ou troca): o painel mostra "atualizado as HH:mm"
+		public DateTime AtualizadoEm { get; private set; }
+
 		private List<Opcao> _opcoes = new List<Opcao>();
 		public IEnumerable<Opcao> Opcoes => _opcoes;
 
@@ -21,6 +24,7 @@ namespace KFRestaurante.Dominio
 		{
 			this.DataPublicacao = dataPublicacao;
 			this.Situacao = SituacaoCardapio.Rascunho;
+			this.AtualizadoEm = DateTime.UtcNow;
 
         }
 
@@ -35,16 +39,21 @@ namespace KFRestaurante.Dominio
 				} else
 				{
                     _opcoes.Add(opcao);
+                    this.AtualizadoEm = DateTime.UtcNow;
                 }
 		
 		}
 
-		// troca a lista inteira de opcoes. So vale em rascunho: depois de publicado o cliente ja viu o cardapio
+		// troca a lista de opcoes.
+		//  - Rascunho: troca livre (o cliente ainda nao viu nada).
+		//  - Publicado: so ACRESCENTA (o prato novo que o dono resolveu vender hoje). Tirar um item e pelo "esgotado",
+		//    porque o cliente ja viu o cardapio e pode ter o item no carrinho.
+		//  - Fechado: recusa; reabra antes.
 		public void SubstituirOpcoes(IEnumerable<Opcao> opcoes)
 		{
-			if (this.Situacao != SituacaoCardapio.Rascunho)
+			if (this.Situacao == SituacaoCardapio.Fechado)
 			{
-				throw new DominioException($"Só é possível trocar as opções de um cardápio em rascunho. O cardápio de {DataPublicacao:dd/MM/yyyy} está {Situacao}.");
+				throw new DominioException($"O cardápio de {DataPublicacao:dd/MM/yyyy} está fechado. Reabra o cardápio para mudar as opções.");
 			}
 
 			List<Opcao> novas = new List<Opcao>();
@@ -59,8 +68,19 @@ namespace KFRestaurante.Dominio
 				novas.Add(opcao);
 			}
 
+			if (this.Situacao == SituacaoCardapio.Publicado)
+			{
+				List<string> removidas = _opcoes.Where(atual => !novas.Any(nova => nova.Nome == atual.Nome)).Select(atual => atual.Nome).ToList();
+
+				if (removidas.Count > 0)
+				{
+					throw new DominioException($"Um cardápio publicado só aceita opções novas. Para tirar {string.Join(", ", removidas)} hoje, marque como esgotado.");
+				}
+			}
+
 			_opcoes.Clear();
 			_opcoes.AddRange(novas);
+			this.AtualizadoEm = DateTime.UtcNow;
 		}
 
 		public void Publicar()
