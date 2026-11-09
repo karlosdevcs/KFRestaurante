@@ -361,3 +361,6 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+# CodeGraph: indice local do codigo, gerado em cada maquina (nao versionar)
+.codegraph/
